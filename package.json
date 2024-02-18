@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-view-count",
 	"version": "0.1.1",
-	"description": "Increments a view count property whenever a note is opened",
+	"description": "Tracks view count for each vault file",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

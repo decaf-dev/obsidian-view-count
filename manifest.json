@@ -3,7 +3,7 @@
 	"name": "View Count",
 	"version": "0.1.1",
 	"minAppVersion": "1.4.0",
-	"description": "Increments a view count property whenever a note is opened",
+	"description": "Tracks view count for each vault file.",
 	"author": "Trey Wallis",
 	"authorUrl": "https://github.com/trey-wallis",
 	"fundingUrl": "https://buymeacoffee.com/treywallis",
