@@ -44,6 +44,12 @@ export default class ViewCountPlugin extends Plugin {
 			}
 		}));
 
+		this.registerEvent(this.app.vault.on("delete", async (file) => {
+			if (file instanceof TFile) {
+				this.deleteLastViewed(file);
+			}
+		}));
+
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
 	}
 
@@ -63,6 +69,15 @@ export default class ViewCountPlugin extends Plugin {
 		const lastViewed = this.settings.lastViewed;
 		const entry = lastViewed.find((entry) => entry.path === file.path);
 		return entry ? entry.viewTime : 0;
+	}
+
+	private async deleteLastViewed(file: TFile) {
+		const lastViewed = this.settings.lastViewed;
+		const index = lastViewed.findIndex((entry) => entry.path === file.path);
+		if (index !== -1) {
+			lastViewed.splice(index, 1);
+			await this.saveSettings();
+		}
 	}
 
 	private async updateLastViewed(file: TFile) {
