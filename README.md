@@ -2,9 +2,9 @@
 
 ## About
 
-This plugin will increment a `view-count` property on every note that is opened in your vault.
+This plugin will track the view count for each file in your vault. The count can be seen at the bottom of a note in the status bar.
 
-You can set plugin to increment the property every time a note is opened or only once a day.
+By default, a _view_ is considered an opening of a file after 12 am your local time for any date. You may set the plugin to increment view count every time a file is opened in the plugin settings.
 
 ## Installation
 
@@ -19,9 +19,10 @@ You can set plugin to increment the property every time a note is opened or only
 
 ## Usage
 
-Install the plugin and note will automatically have a `view-count` property incremented
+Install the plugin and files will automatically have their view count tracked.
+
+View count is stored in `.obsidian/view-count.json`. This allows you to uninstall and install the plugin again without losing any data. In addition, this view count is stored in a friendly JSON format that may be parsed by other applications.
 
 ### Settings
 
--   **Property name** - update the property name
--   **Update once a day** - toggle this if you want the `view-count` property to only update once a day if a note is opened
+-   **Increment count once a day** - when enabled a file view count will only be incremented once a day. Otherwise, the file view count will be incremented every time it is opened.
