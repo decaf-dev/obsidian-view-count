@@ -1,14 +1,19 @@
-import { Plugin, } from 'obsidian';
+import { Plugin, TFile, moment } from 'obsidian';
 import ViewCountSettingsTab from './obsidian/ViewCountSettingsTab';
 
 interface ViewCountPluginSettings {
 	incrementOnceADay: boolean;
 	propertyName: string;
+	lastViewed: {
+		path: string,
+		viewTime: number
+	}[];
 }
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
 	propertyName: "view-count",
+	lastViewed: []
 }
 
 export default class ViewCountPlugin extends Plugin {
@@ -17,8 +22,73 @@ export default class ViewCountPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
+		this.registerEvent(this.app.workspace.on("file-open", async (file) => {
+			if (file === null) return;
+			if (file.extension !== "md") return;
 
+			const incrementOnceADay = this.settings.incrementOnceADay;
+			if (incrementOnceADay) {
+				const lastViewedMillis = this.getLastViewed(file);
+				const startTodayMillis = moment().startOf('day').valueOf();
+				if (lastViewedMillis >= startTodayMillis) {
+					return;
+				}
+			}
+			await this.updateLastViewed(file);
+			await this.incrementViewCount(file);
+		}));
+
+		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
+			if (file instanceof TFile) {
+				await this.renameLastViewed(file.path, oldPath);
+			}
+		}));
+
+		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
+	}
+
+	private async incrementViewCount(file: TFile) {
+		const propertyName = this.settings.propertyName;
+
+		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter[propertyName]) {
+				frontmatter[propertyName] = 1;
+			} else {
+				frontmatter[propertyName]++;
+			}
+		});
+	}
+
+	private getLastViewed(file: TFile) {
+		const lastViewed = this.settings.lastViewed;
+		const entry = lastViewed.find((entry) => entry.path === file.path);
+		return entry ? entry.viewTime : 0;
+	}
+
+	private async updateLastViewed(file: TFile) {
+		const lastViewed = this.settings.lastViewed;
+		const index = lastViewed.findIndex((entry) => entry.path === file.path);
+		if (index === -1) {
+			lastViewed.push({ path: file.path, viewTime: Date.now() });
+		} else {
+			lastViewed[index].viewTime = Date.now();
+		}
+		await this.saveSettings();
+	}
+
+	private async renameLastViewed(newPath: string, oldPath: string) {
+		const lastViewed = this.settings.lastViewed;
+		this.settings.lastViewed = lastViewed.map((entry) => {
+			const { path } = entry;
+			if (path === oldPath) {
+				return {
+					...entry,
+					path: newPath
+				}
+			}
+			return entry;
+		});
+		await this.saveSettings();
 	}
 
 	onunload() {
