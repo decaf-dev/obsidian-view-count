@@ -14,20 +14,9 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-
-		new Setting(containerEl)
-			.setName('Property name')
-			.setDesc('The name of the property that the view count will be stored in')
-			.addText(text => text
-				.setValue(this.plugin.settings.propertyName)
-				.onChange(async (value) => {
-					this.plugin.settings.propertyName = value;
-					await this.plugin.saveSettings();
-				}));
-
 		new Setting(containerEl)
 			.setName('Increment once a day')
-			.setDesc('If enabled, the view count will only increment once a day otherwise it will increment every time the note is opened')
+			.setDesc('If enabled a file view count will only be incremented once a day. Otherwise, the file view count will be incremented every time it is opened.')
 			.addToggle(component => component
 				.setValue(this.plugin.settings.incrementOnceADay)
 				.onChange(async (value) => {

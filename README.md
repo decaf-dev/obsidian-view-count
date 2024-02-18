@@ -25,4 +25,4 @@ View count is stored in `.obsidian/view-count.json`. This allows you to uninstal
 
 ### Settings
 
--   **Increment count once a day** - when enabled a file view count will only be incremented once a day. Otherwise, the file view count will be incremented every time it is opened.
+-   **Increment count once a day** - if enabled a file view count will only be incremented once a day. Otherwise, the file view count will be incremented every time it is opened.

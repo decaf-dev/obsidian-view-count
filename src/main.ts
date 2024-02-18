@@ -1,5 +1,5 @@
 import { Plugin, TFile, moment } from 'obsidian';
-import ViewCountSettingsTab from './obsidian/ViewCountSettingsTab';
+import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
 
 interface ViewCountPluginSettings {
 	incrementOnceADay: boolean;
