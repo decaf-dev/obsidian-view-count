@@ -3,7 +3,6 @@ import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
 
 interface ViewCountPluginSettings {
 	incrementOnceADay: boolean;
-	propertyName: string;
 	lastViewed: {
 		path: string,
 		viewTime: number
@@ -12,7 +11,6 @@ interface ViewCountPluginSettings {
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
-	propertyName: "view-count",
 	lastViewed: []
 }
 
@@ -54,15 +52,15 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	private async incrementViewCount(file: TFile) {
-		const propertyName = this.settings.propertyName;
+		// const propertyName = this.settings.propertyName;
 
-		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			if (!frontmatter[propertyName]) {
-				frontmatter[propertyName] = 1;
-			} else {
-				frontmatter[propertyName]++;
-			}
-		});
+		// await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+		// 	if (!frontmatter[propertyName]) {
+		// 		frontmatter[propertyName] = 1;
+		// 	} else {
+		// 		frontmatter[propertyName]++;
+		// 	}
+		// });
 	}
 
 	private getLastViewed(file: TFile) {
