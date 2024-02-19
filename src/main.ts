@@ -37,7 +37,9 @@ export default class ViewCountPlugin extends Plugin {
 			if (!this.viewCountStatusBarItem) {
 				this.viewCountStatusBarItem = this.addStatusBarItem();
 			}
-			this.viewCountStatusBarItem.setText(`${this.viewCountCache.getViewCount(file)} views`);
+			const viewCount = this.viewCountCache.getViewCount(file);
+			const viewName = viewCount === 1 ? "view" : "views";
+			this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
 		}));
 
 		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
