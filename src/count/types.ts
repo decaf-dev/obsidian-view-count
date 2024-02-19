@@ -1,5 +1,5 @@
 export interface ViewCountEntry {
-	filePath: string;
+	path: string;
 	viewCount: number;
 	lastViewMillis: number;
 }

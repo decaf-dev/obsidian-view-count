@@ -49,11 +49,11 @@ class ViewCountCache {
 	}
 
 	async incrementViewCount(file: TFile) {
-		const entry = this.entries.find((entry) => entry.filePath === file.path);
+		const entry = this.entries.find((entry) => entry.path === file.path);
 
 		if (entry) {
 			this.entries = this.entries.map((entry) => {
-				if (entry.filePath === file.path) {
+				if (entry.path === file.path) {
 					return {
 						...entry,
 						viewCount: entry.viewCount + 1,
@@ -64,7 +64,7 @@ class ViewCountCache {
 			});
 		} else {
 			this.entries = [...this.entries, {
-				filePath: file.path,
+				path: file.path,
 				viewCount: 1,
 				lastViewMillis: Date.now()
 			}];
@@ -74,17 +74,17 @@ class ViewCountCache {
 	}
 
 	getViewTime(file: TFile) {
-		return this.entries.find((entry) => entry.filePath === file.path)?.lastViewMillis ?? 0;
+		return this.entries.find((entry) => entry.path === file.path)?.lastViewMillis ?? 0;
 	}
 
 	getViewCount(file: TFile) {
-		return this.entries.find((entry) => entry.filePath === file.path)?.viewCount ?? 0;
+		return this.entries.find((entry) => entry.path === file.path)?.viewCount ?? 0;
 	}
 
 	async renameLastViewed(newPath: string, oldPath: string) {
 		this.entries = this.entries.map((entry) => {
-			if (entry.filePath === oldPath) {
-				entry.filePath = newPath;
+			if (entry.path === oldPath) {
+				entry.path = newPath;
 			}
 			return entry;
 		});
@@ -92,7 +92,7 @@ class ViewCountCache {
 	}
 
 	async deleteLastViewed(file: TFile) {
-		this.entries = this.entries.filter((entry) => entry.filePath !== file.path);
+		this.entries = this.entries.filter((entry) => entry.path !== file.path);
 		await this.save(this.app);
 	}
 }
