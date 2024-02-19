@@ -5,7 +5,7 @@ import { normalize } from "path";
 export const stringifyEntires = (entries: ViewCountEntries) => {
 	return JSON.stringify({
 		items: entries
-	});
+	}, null, 2);
 }
 
 export const parseEntires = (fileData: string) => {
