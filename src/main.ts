@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings;
 	viewCountCache: ViewCountCache;
+	viewCountStatusBarItem?: HTMLElement;
 
 	async onload() {
 		this.viewCountCache = new ViewCountCache(this.app);
@@ -32,9 +33,11 @@ export default class ViewCountPlugin extends Plugin {
 				}
 			}
 			await this.viewCountCache.incrementViewCount(file);
-			console.log('View Count Plugin: File opened: ', file.path);
-			console.log('View Count Plugin: View count: ', this.viewCountCache.getViewCount(file));
-			//this.addStatusBarItem().setText('View Count Plugin');
+
+			if (!this.viewCountStatusBarItem) {
+				this.viewCountStatusBarItem = this.addStatusBarItem();
+			}
+			this.viewCountStatusBarItem.setText(`${this.viewCountCache.getViewCount(file)} views`);
 		}));
 
 		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
@@ -53,7 +56,7 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	onunload() {
-
+		this.viewCountStatusBarItem?.remove();
 	}
 
 	async loadSettings() {
