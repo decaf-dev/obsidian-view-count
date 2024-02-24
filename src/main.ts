@@ -28,11 +28,12 @@ export default class ViewCountPlugin extends Plugin {
 			if (incrementOnceADay) {
 				const lastViewedMillis = this.viewCountCache.getViewTime(file);
 				const startTodayMillis = moment().startOf('day').valueOf();
-				if (lastViewedMillis >= startTodayMillis) {
-					return;
+				if (lastViewedMillis < startTodayMillis) {
+					await this.viewCountCache.incrementViewCount(file);
 				}
+			} else {
+				await this.viewCountCache.incrementViewCount(file);
 			}
-			await this.viewCountCache.incrementViewCount(file);
 
 			if (!this.viewCountStatusBarItem) {
 				this.viewCountStatusBarItem = this.addStatusBarItem();
