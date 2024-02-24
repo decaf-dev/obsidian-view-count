@@ -2,9 +2,7 @@
 
 ## About
 
-This plugin will track the view count for each file in your vault. The count can be seen at the bottom of a note in the status bar.
-
-By default, a _view_ is considered an opening of a file after 12 am your local time for any date. You may set the plugin to increment view count every time a file is opened in the plugin settings.
+This plugin will track the view count for each file in your vault. The count can be seen as a property or at the bottom of the note in the status bar depending on plugin configuration.
 
 ## Installation
 
@@ -14,15 +12,23 @@ By default, a _view_ is considered an opening of a file after 12 am your local t
 4. Click **Add beta plugin**
 5. Enter the repository url: **https://github.com/trey-wallis/obsidian-view-count**
 6. Click **Add plugin**
-7. Navigate to the community plugins list
-8. Enable **View Count**
 
 ## Usage
 
-Install the plugin and files will automatically have their view count tracked.
-
-View count is stored in `.obsidian/view-count.json`. This allows you to uninstall and install the plugin again without losing any data. In addition, this view count is stored in a friendly JSON format that may be parsed by other applications.
+By default the plugin will save view count in a property called `view-count` in each file that is opened. The view count will be incremented once a day. To change these settings, please view the **Settings** section below.
 
 ### Settings
 
--   **Increment count once a day** - if enabled a file view count will only be incremented once a day. Otherwise, the file view count will be incremented every time it is opened.
+#### Storage
+
+This plugin has 2 storage options for view count: **Property** and **File**. Please restart Obsidian after changing this setting.
+
+**Property storage** - If property is selected, each note will have their view count stored in a property in their frontmatter.
+
+**File storage** - If file is selected, the view count for all notes will be stored in a JSON file called `view-count.json` in the Obsidian config directory (by default `.obsidian`). The view count will then appear in the status bar at the bottom of each note.
+
+#### Other
+
+**Increment count once a day** - if enabled a view count will increment once a day. _Once a day_ meaning an opening of a file after 12 am your local time for any given date. If disabled, the view count will increment each time the file is opened.
+
+When increment a day is enabled and the property type is set to storage, a last view time property will be stored to your note as well.

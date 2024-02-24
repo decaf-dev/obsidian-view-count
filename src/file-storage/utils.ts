@@ -2,13 +2,13 @@ import { App } from "obsidian";
 import { ViewCountEntries } from "./types";
 import { normalize } from "path";
 
-export const stringifyEntires = (entries: ViewCountEntries) => {
+export const stringifyEntries = (entries: ViewCountEntries) => {
 	return JSON.stringify({
 		items: entries
 	}, null, 2);
 }
 
-export const parseEntires = (fileData: string) => {
+export const parseEntries = (fileData: string) => {
 	const json = JSON.parse(fileData);
 
 	if (!json.items)
