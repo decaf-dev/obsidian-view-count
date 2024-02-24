@@ -42,19 +42,11 @@ export default class ViewCountPlugin extends Plugin {
 			if (incrementOnceADay) {
 				const lastViewedMillis = await this.propertyStorage.getLastViewTime(file);
 				const startTodayMillis = moment().startOf('day').valueOf();
-				if (lastViewedMillis < startTodayMillis) {
-					await this.propertyStorage.incrementViewCount(file);
+				if (lastViewedMillis >= startTodayMillis) {
+					return;
 				}
-			} else {
-				await this.propertyStorage.incrementViewCount(file);
 			}
-
-			if (!this.viewCountStatusBarItem) {
-				this.viewCountStatusBarItem = this.addStatusBarItem();
-			}
-			const viewCount = await this.propertyStorage.getViewCount(file);
-			const viewName = viewCount === 1 ? "view" : "views";
-			this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
+			await this.propertyStorage.incrementViewCount(file);
 		}));
 	}
 
