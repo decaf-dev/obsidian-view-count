@@ -14,15 +14,19 @@ By default, a _view_ is considered an opening of a file after 12 am your local t
 4. Click **Add beta plugin**
 5. Enter the repository url: **https://github.com/trey-wallis/obsidian-view-count**
 6. Click **Add plugin**
-7. Navigate to the community plugins list
-8. Enable **View Count**
 
 ## Usage
 
-Install the plugin and files will automatically have their view count tracked.
+This plugin has 2 storage options for view count: **Property** and **File**
 
-View count is stored in `.obsidian/view-count.json`. This allows you to uninstall and install the plugin again without losing any data. In addition, this view count is stored in a friendly JSON format that may be parsed by other applications.
+### Property storage
 
-### Settings
+If property is selected, each note will have their view count stored in a property in their frontmatter. This is helpful if you wish to visually see the view count in the frontmatter of a note.
+
+### File storage
+
+If file is selected, the view count for all notes will be stored in a JSON file called `view-count.json` in the Obsidian configuration directory.
+
+## Settings
 
 -   **Increment count once a day** - if enabled a file view count will only be incremented once a day. Otherwise, the file view count will be incremented every time it is opened.
