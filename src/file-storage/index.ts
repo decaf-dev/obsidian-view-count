@@ -1,8 +1,8 @@
 import { App, Notice, TFile } from "obsidian";
 import { ViewCountEntries } from "./types";
-import { getFilePath, parseEntires, stringifyEntires } from "./utils";
+import { getFilePath, parseEntries, stringifyEntries } from "./utils";
 
-class ViewCountCache {
+export default class FileStorage {
 	private app: App;
 	private entries: ViewCountEntries;
 
@@ -16,12 +16,12 @@ class ViewCountCache {
 		const exists = await this.app.vault.adapter.exists(path);
 
 		if (!exists) {
-			const data = stringifyEntires([]);
+			const data = stringifyEntries([]);
 			try {
-				console.log("Creating cache");
+				console.log("Creating file cache");
 				await this.app.vault.create(path, data);
 			} catch (err) {
-				console.error("Error creating cache: ", (err as Error).message);
+				console.error("Error creating file cache: ", (err as Error).message);
 				new Notice("View Count: error loading view count");
 			}
 			return;
@@ -29,10 +29,10 @@ class ViewCountCache {
 
 		try {
 			const result = await this.app.vault.adapter.read(path);
-			this.entries = parseEntires(result);
-			console.log("Loaded cache: ", this.entries);
+			this.entries = parseEntries(result);
+			console.log("Loaded file cache: ", this.entries);
 		} catch (err) {
-			console.error("Error loading cache: ", (err as Error).message);
+			console.error("Error loading file cache: ", (err as Error).message);
 			new Notice("View Count: error loading cache");
 		}
 	}
@@ -40,11 +40,11 @@ class ViewCountCache {
 	async save(app: App) {
 		try {
 			const path = getFilePath(app);
-			const data = stringifyEntires(this.entries);
+			const data = stringifyEntries(this.entries);
 			await app.vault.adapter.write(path, data);
 		} catch (err) {
-			console.error("Error saving cache: ", (err as Error).message);
-			new Notice("View Count: error saving cache");
+			console.error("Error saving file cache: ", (err as Error).message);
+			new Notice("View Count: error saving file cache");
 		}
 	}
 
@@ -96,5 +96,3 @@ class ViewCountCache {
 		await this.save(this.app);
 	}
 }
-
-export default ViewCountCache;
