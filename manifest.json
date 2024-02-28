@@ -1,7 +1,7 @@
 {
 	"id": "view-count",
 	"name": "View Count",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"minAppVersion": "1.4.0",
 	"description": "Tracks view count for each vault file.",
 	"author": "Trey Wallis",

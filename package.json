@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-view-count",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"description": "Tracks view count for each vault file",
 	"main": "main.js",
 	"scripts": {
