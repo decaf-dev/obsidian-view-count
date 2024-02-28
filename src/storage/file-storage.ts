@@ -17,7 +17,7 @@ export default class FileStorage extends ViewCountStorage {
 		if (!exists) {
 			const data = stringifyEntries([]);
 			try {
-				console.log("Creating file cache");
+				//console.log("Creating file cache");
 				await this.app.vault.create(path, data);
 			} catch (err) {
 				console.error("Error creating file cache: ", (err as Error).message);
@@ -29,7 +29,7 @@ export default class FileStorage extends ViewCountStorage {
 		try {
 			const result = await this.app.vault.adapter.read(path);
 			this.entries = parseEntries(result);
-			console.log("Loaded file cache: ", this.entries);
+			//console.log("Loaded file cache: ", this.entries);
 			this.refresh();
 		} catch (err) {
 			console.error("Error loading file cache: ", (err as Error).message);
@@ -49,7 +49,7 @@ export default class FileStorage extends ViewCountStorage {
 	}
 
 	async incrementViewCount(file: TFile) {
-		console.log("Incrementing view count for file: ", file.path);
+		//console.log("Incrementing view count for file: ", file.path);
 		const entry = this.entries.find((entry) => entry.path === file.path);
 
 		if (entry) {
@@ -84,7 +84,7 @@ export default class FileStorage extends ViewCountStorage {
 	}
 
 	async renameEntry(newPath: string, oldPath: string) {
-		console.log("Renaming file: ", oldPath, newPath);
+		//console.log("Renaming file: ", oldPath, newPath);
 		this.entries = this.entries.map((entry) => {
 			if (entry.path === oldPath) {
 				entry.path = newPath;
@@ -96,7 +96,7 @@ export default class FileStorage extends ViewCountStorage {
 	}
 
 	async deleteEntry(file: TFile) {
-		console.log("Deleting file: ", file.path);
+		//console.log("Deleting file: ", file.path);
 		this.entries = this.entries.filter((entry) => entry.path !== file.path);
 		await this.save(this.app);
 		this.refresh();

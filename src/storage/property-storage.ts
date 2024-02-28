@@ -87,7 +87,7 @@ export default class PropertyStorage extends ViewCountStorage {
 	}
 
 	async renameEntry(newPath: string, oldPath: string) {
-		console.log("Renaming file: ", oldPath, newPath);
+		//console.log("Renaming file: ", oldPath, newPath);
 		this.entries = this.entries.map((entry) => {
 			if (entry.path === oldPath) {
 				entry.path = newPath;
@@ -98,7 +98,7 @@ export default class PropertyStorage extends ViewCountStorage {
 	}
 
 	async deleteEntry(file: TFile) {
-		console.log("Deleting file: ", file.path);
+		//console.log("Deleting file: ", file.path);
 		this.entries = this.entries.filter((entry) => entry.path !== file.path);
 		this.refresh();
 	}
