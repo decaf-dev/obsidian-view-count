@@ -1,6 +1,8 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import ViewCountPlugin from "src/main";
 
+import "./styles.css";
+
 class ViewCountSettingsTab extends PluginSettingTab {
 	plugin: ViewCountPlugin;
 
@@ -14,9 +16,19 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+
+		const storageTypeDesc = new DocumentFragment();
+		storageTypeDesc.createDiv({
+			text: "If property is selected, each note will have their view count stored in a property in their frontmatter. If file is selected, the view count for all notes will be stored in a file in the Obsidian config directory.",
+		});
+		storageTypeDesc.createEl("br");
+		storageTypeDesc.createDiv({
+			text: "Please restart Obsidian after changing this setting.",
+			cls: "view-count-text--emphasize",
+		});
 		new Setting(containerEl)
 			.setName('Storage type')
-			.setDesc('If property is selected, each note will have their view count stored in a property in their frontmatter. If file is selected, the view count for all notes will be stored in a file in the Obsidian config directory. Please restart Obsidian after changing this setting.')
+			.setDesc(storageTypeDesc)
 			.addDropdown(component => component
 				.addOptions({
 					'property': 'Property',
@@ -27,7 +39,6 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					this.plugin.settings.storageType = value as unknown as "property" | "file";
 					await this.plugin.saveSettings();
 				}));
-
 
 		new Setting(containerEl)
 			.setName('Increment once a day')
@@ -41,7 +52,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('View count property name')
-			.setDesc('The name of the property that the view count will be stored in')
+			.setDesc('The name of the property that the view count will be stored in. This is only used if the storage type is set to property.')
 			.setDisabled(this.plugin.settings.storageType !== "property")
 			.addText(text => text
 				.setValue(this.plugin.settings.viewCountPropertyName)

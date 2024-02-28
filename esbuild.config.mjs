@@ -12,6 +12,22 @@ if you want to view the source, please visit the github repository of this plugi
 
 const prod = process.argv[2] === "production";
 
+const rebuildPlugin = {
+	name: "rebuild-handler",
+	setup(build) {
+		build.onEnd(async () => {
+			await fs.promises.rename(
+				path.join(path.resolve(), "dist", "main.css"),
+				path.join(path.resolve(), "dist", "styles.css")
+			);
+			await fs.promises.copyFile(
+				path.join(path.resolve(), "manifest.json"),
+				path.join(path.resolve(), "dist", "manifest.json")
+			);
+		});
+	},
+};
+
 const context = await esbuild.context({
 	banner: {
 		js: banner,
@@ -40,14 +56,11 @@ const context = await esbuild.context({
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	outfile: "dist/main.js",
+	plugins: [rebuildPlugin],
 });
 
 if (prod) {
 	await context.rebuild();
-	await fs.promises.copyFile(
-		path.join(path.resolve(), "manifest.json"),
-		path.join(path.resolve(), "dist", "manifest.json")
-	);
 	process.exit(0);
 } else {
 	await context.watch();
