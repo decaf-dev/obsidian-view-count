@@ -1,6 +1,7 @@
 import { App, TFile } from "obsidian";
 import { ViewCountPluginSettings } from "src/types";
 import ViewCountStorage from "./view-count-storage";
+import { dateTimeToUnixTimeMillis, getPropertyType, setPropertyType, unixTimeMillisToDateTime } from "./utils";
 
 export default class PropertyStorage extends ViewCountStorage {
 	private app: App;
@@ -18,9 +19,12 @@ export default class PropertyStorage extends ViewCountStorage {
 		const markdownFiles = this.app.vault.getMarkdownFiles();
 		for (const file of markdownFiles) {
 			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
+
+			const dateTime = frontmatter?.[lastViewTimePropertyName] ?? "";
+			const timeMillis = dateTimeToUnixTimeMillis(dateTime);
 			this.entries.push({
 				viewCount: frontmatter?.[viewCountPropertyName] ?? 0,
-				lastViewMillis: frontmatter?.[lastViewTimePropertyName] ?? 0,
+				lastViewMillis: timeMillis,
 				path: file.path
 			})
 		}
@@ -53,7 +57,8 @@ export default class PropertyStorage extends ViewCountStorage {
 
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			if (incrementOnceADay) {
-				frontmatter[lastViewTimePropertyName] = Date.now();
+				const dateTime = unixTimeMillisToDateTime(Date.now());
+				frontmatter[lastViewTimePropertyName] = dateTime;
 			}
 
 			if (!frontmatter[viewCountPropertyName]) {
@@ -79,11 +84,12 @@ export default class PropertyStorage extends ViewCountStorage {
 	async getLastViewTime(file: TFile) {
 		const { lastViewTimePropertyName } = this.settings;
 
-		let lastViewTime = 0;
+		let lastViewTime = "";
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			lastViewTime = frontmatter[lastViewTimePropertyName] ?? 0;
+			lastViewTime = frontmatter[lastViewTimePropertyName] ?? "";
 		});
-		return lastViewTime;
+		const timeMillis = dateTimeToUnixTimeMillis(lastViewTime);
+		return timeMillis;
 	}
 
 	async renameEntry(newPath: string, oldPath: string) {
@@ -102,6 +108,4 @@ export default class PropertyStorage extends ViewCountStorage {
 		this.entries = this.entries.filter((entry) => entry.path !== file.path);
 		this.refresh();
 	}
-
-	//TODO Handle property update by user
 }
