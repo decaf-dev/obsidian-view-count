@@ -62,7 +62,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Last view date property name')
+			.setName('View date property name')
 			.setDesc('The name of the property that the last view date will be stored in. This is only used if increment once a day is enabled.')
 			.setDisabled(this.plugin.settings.storageType !== "property" || !this.plugin.settings.incrementOnceADay)
 			.addText(text => text
