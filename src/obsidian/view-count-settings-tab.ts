@@ -53,9 +53,20 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+
+		const viewCountDesc = new DocumentFragment();
+		viewCountDesc.createDiv({
+			text: "The name of the property that the view count will be stored in. This is only used if the storage type is set to property.",
+		});
+		viewCountDesc.createEl("br");
+		viewCountDesc.createDiv({
+			text: "Please rename the existing property before updating this setting. You can use the rename option in the All Properties view in the sidebar to do this.",
+			cls: "view-count-text--emphasize",
+		});
+
 		new Setting(containerEl)
 			.setName('View count property name')
-			.setDesc('The name of the property that the view count will be stored in. This is only used if the storage type is set to property.')
+			.setDesc(viewCountDesc)
 			.setDisabled(this.plugin.settings.storageType !== "property")
 			.addText(text => text
 				.setValue(this.plugin.settings.viewCountPropertyName)
@@ -64,9 +75,19 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		const viewDateDesc = new DocumentFragment();
+		viewDateDesc.createDiv({
+			text: "The name of the property that the last view date will be stored in. This is only used if increment once a day is enabled.",
+		});
+		viewDateDesc.createEl("br");
+		viewDateDesc.createDiv({
+			text: "Please rename the existing property before updating this setting. You can use the rename option in the All Properties view in the sidebar to do this.",
+			cls: "view-count-text--emphasize",
+		});
+
 		new Setting(containerEl)
 			.setName('View date property name')
-			.setDesc('The name of the property that the last view date will be stored in. This is only used if increment once a day is enabled.')
+			.setDesc(viewDateDesc)
 			.setDisabled(this.plugin.settings.storageType !== "property" || !this.plugin.settings.incrementOnceADay)
 			.addText(text => text
 				.setValue(this.plugin.settings.lastViewDatePropertyName)
