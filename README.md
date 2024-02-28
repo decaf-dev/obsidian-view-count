@@ -31,4 +31,4 @@ This plugin has 2 storage options for view count: **Property** and **File**. Ple
 
 **Increment count once a day** - if enabled a view count will increment once a day. _Once a day_ meaning an opening of a file after 12 am your local time for any given date. If disabled, the view count will increment each time the file is opened.
 
-When increment a day is enabled and the property type is set to storage, a last view time property will be stored to your note as well.
+When increment a day is enabled and the property type is set to storage, a last view date property will be stored to your note.
