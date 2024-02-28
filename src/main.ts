@@ -5,13 +5,15 @@ import PropertyStorage from './storage/property-storage';
 import { ViewCountPluginSettings } from './types';
 import ViewCountItemView from './obsidian/view-count-item-view';
 import { VIEW_COUNT_ITEM_VIEW } from './constants';
-import { getPropertyType, setPropertyType, unixTimeMillisToDateTime } from './storage/utils';
+import Migrate_050 from './migrate/migrate-0.5.0';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
 	storageType: "property",
 	viewCountPropertyName: "view-count",
-	lastViewTimePropertyName: "last-view-time"
+	lastViewDatePropertyName: "view-date",
+	lastViewTimePropertyName: "last-view-time", //TODO remove this after a few releases. 0.4.1 and prior
+	pluginVersion: "",
 }
 
 export default class ViewCountPlugin extends Plugin {
@@ -36,6 +38,15 @@ export default class ViewCountPlugin extends Plugin {
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
 
 		this.app.workspace.onLayoutReady(async () => {
+			await new Migrate_050(this, this.app, this.settings).migrate();
+
+			//This needs to be before the migration
+			if (this.settings.pluginVersion !== this.manifest.version) {
+				this.settings.pluginVersion = this.manifest.version;
+				await this.saveSettings();
+			}
+
+			//This needs to run before events are setup
 			await this.storage.load();
 
 			if (this.settings.storageType === "file") {
@@ -50,27 +61,6 @@ export default class ViewCountPlugin extends Plugin {
 					type: VIEW_COUNT_ITEM_VIEW,
 					active: false,
 				});
-			}
-
-			//Migrate to 0.5.0
-			//TODO remove this after a few releases
-			const { lastViewTimePropertyName } = this.settings;
-			const type = await getPropertyType(this.app, lastViewTimePropertyName);
-			if (type != "datetime") {
-				const markdownFiles = this.app.vault.getMarkdownFiles();
-
-				for (const file of markdownFiles) {
-					await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-						if (!frontmatter[lastViewTimePropertyName]) return;
-
-						if (typeof frontmatter[lastViewTimePropertyName] === "number") {
-							const dateTime = unixTimeMillisToDateTime(frontmatter[lastViewTimePropertyName]);
-							frontmatter[lastViewTimePropertyName] = dateTime;
-						}
-					});
-				}
-
-				await setPropertyType(this.app, lastViewTimePropertyName, "datetime");
 			}
 		});
 	}
@@ -139,6 +129,7 @@ export default class ViewCountPlugin extends Plugin {
 			}
 		}));
 	}
+
 
 	onunload() {
 		this.viewCountStatusBarItem?.remove();

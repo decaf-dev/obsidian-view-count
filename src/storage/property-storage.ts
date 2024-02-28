@@ -1,7 +1,7 @@
 import { App, TFile } from "obsidian";
 import { ViewCountPluginSettings } from "src/types";
 import ViewCountStorage from "./view-count-storage";
-import { dateTimeToUnixTimeMillis, getPropertyType, setPropertyType, unixTimeMillisToDateTime } from "./utils";
+import { dateToUnixTimeMillis, unixTimeMillisToDate } from "src/utils/time-utils";
 
 export default class PropertyStorage extends ViewCountStorage {
 	private app: App;
@@ -14,14 +14,14 @@ export default class PropertyStorage extends ViewCountStorage {
 	}
 
 	async load() {
-		const { viewCountPropertyName, lastViewTimePropertyName } = this.settings;
+		const { viewCountPropertyName, lastViewDatePropertyName } = this.settings;
 
 		const markdownFiles = this.app.vault.getMarkdownFiles();
 		for (const file of markdownFiles) {
 			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
 
-			const dateTime = frontmatter?.[lastViewTimePropertyName] ?? "";
-			const timeMillis = dateTimeToUnixTimeMillis(dateTime);
+			const date = frontmatter?.[lastViewDatePropertyName] ?? "";
+			const timeMillis = dateToUnixTimeMillis(date);
 			this.entries.push({
 				viewCount: frontmatter?.[viewCountPropertyName] ?? 0,
 				lastViewMillis: timeMillis,
@@ -33,7 +33,7 @@ export default class PropertyStorage extends ViewCountStorage {
 	}
 
 	async incrementViewCount(file: TFile) {
-		const { viewCountPropertyName, incrementOnceADay, lastViewTimePropertyName } = this.settings;
+		const { viewCountPropertyName, incrementOnceADay, lastViewDatePropertyName } = this.settings;
 		const entry = this.entries.find((entry) => entry.path === file.path);
 
 		if (entry) {
@@ -57,8 +57,8 @@ export default class PropertyStorage extends ViewCountStorage {
 
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			if (incrementOnceADay) {
-				const dateTime = unixTimeMillisToDateTime(Date.now());
-				frontmatter[lastViewTimePropertyName] = dateTime;
+				const date = unixTimeMillisToDate(Date.now());
+				frontmatter[lastViewDatePropertyName] = date;
 			}
 
 			if (!frontmatter[viewCountPropertyName]) {
@@ -82,13 +82,13 @@ export default class PropertyStorage extends ViewCountStorage {
 	}
 
 	async getLastViewTime(file: TFile) {
-		const { lastViewTimePropertyName } = this.settings;
+		const { lastViewDatePropertyName } = this.settings;
 
-		let lastViewTime = "";
+		let lastViewDate = "";
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			lastViewTime = frontmatter[lastViewTimePropertyName] ?? "";
+			lastViewDate = frontmatter[lastViewDatePropertyName] ?? "";
 		});
-		const timeMillis = dateTimeToUnixTimeMillis(lastViewTime);
+		const timeMillis = dateToUnixTimeMillis(lastViewDate);
 		return timeMillis;
 	}
 
