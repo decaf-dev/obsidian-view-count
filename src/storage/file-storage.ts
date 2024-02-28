@@ -1,14 +1,13 @@
 import { App, Notice, TFile } from "obsidian";
-import { ViewCountEntries } from "./types";
 import { getFilePath, parseEntries, stringifyEntries } from "./utils";
+import ViewCountStorage from "./view-count-storage";
 
-export default class FileStorage {
+export default class FileStorage extends ViewCountStorage {
 	private app: App;
-	private entries: ViewCountEntries;
 
 	constructor(app: App) {
+		super();
 		this.app = app;
-		this.entries = [];
 	}
 
 	async load() {
@@ -31,6 +30,7 @@ export default class FileStorage {
 			const result = await this.app.vault.adapter.read(path);
 			this.entries = parseEntries(result);
 			console.log("Loaded file cache: ", this.entries);
+			this.refresh();
 		} catch (err) {
 			console.error("Error loading file cache: ", (err as Error).message);
 			new Notice("View Count: error loading cache");
@@ -49,6 +49,7 @@ export default class FileStorage {
 	}
 
 	async incrementViewCount(file: TFile) {
+		console.log("Incrementing view count for file: ", file.path);
 		const entry = this.entries.find((entry) => entry.path === file.path);
 
 		if (entry) {
@@ -71,17 +72,19 @@ export default class FileStorage {
 		}
 
 		await this.save(this.app);
+		this.refresh();
 	}
 
-	getViewTime(file: TFile) {
+	async getLastViewTime(file: TFile) {
 		return this.entries.find((entry) => entry.path === file.path)?.lastViewMillis ?? 0;
 	}
 
-	getViewCount(file: TFile) {
+	async getViewCount(file: TFile) {
 		return this.entries.find((entry) => entry.path === file.path)?.viewCount ?? 0;
 	}
 
-	async renameLastViewed(newPath: string, oldPath: string) {
+	async renameEntry(newPath: string, oldPath: string) {
+		console.log("Renaming file: ", oldPath, newPath);
 		this.entries = this.entries.map((entry) => {
 			if (entry.path === oldPath) {
 				entry.path = newPath;
@@ -89,10 +92,13 @@ export default class FileStorage {
 			return entry;
 		});
 		await this.save(this.app);
+		this.refresh();
 	}
 
-	async deleteLastViewed(file: TFile) {
+	async deleteEntry(file: TFile) {
+		console.log("Deleting file: ", file.path);
 		this.entries = this.entries.filter((entry) => entry.path !== file.path);
 		await this.save(this.app);
+		this.refresh();
 	}
 }
