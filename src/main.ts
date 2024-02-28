@@ -5,6 +5,7 @@ import PropertyStorage from './storage/property-storage';
 import { ViewCountPluginSettings } from './types';
 import ViewCountItemView from './obsidian/view-count-item-view';
 import { VIEW_COUNT_ITEM_VIEW } from './constants';
+import { getPropertyType, setPropertyType, unixTimeMillisToDateTime } from './storage/utils';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
@@ -50,6 +51,27 @@ export default class ViewCountPlugin extends Plugin {
 					active: false,
 				});
 			}
+
+			//Migrate to 0.5.0
+			//TODO remove this after a few releases
+			const { lastViewTimePropertyName } = this.settings;
+			const type = await getPropertyType(this.app, lastViewTimePropertyName);
+			if (type != "datetime") {
+				const markdownFiles = this.app.vault.getMarkdownFiles();
+
+				for (const file of markdownFiles) {
+					await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+						if (!frontmatter[lastViewTimePropertyName]) return;
+
+						if (typeof frontmatter[lastViewTimePropertyName] === "number") {
+							const dateTime = unixTimeMillisToDateTime(frontmatter[lastViewTimePropertyName]);
+							frontmatter[lastViewTimePropertyName] = dateTime;
+						}
+					});
+				}
+
+				await setPropertyType(this.app, lastViewTimePropertyName, "datetime");
+			}
 		});
 	}
 
@@ -90,7 +112,7 @@ export default class ViewCountPlugin extends Plugin {
 			if (incrementOnceADay) {
 				const lastViewedMillis = await this.storage.getLastViewTime(file);
 				const startTodayMillis = moment().startOf('day').valueOf();
-				if (lastViewedMillis < startTodayMillis) {
+				if (lastViewedMillis >= startTodayMillis) {
 					await this.storage.incrementViewCount(file);
 				}
 			} else {
