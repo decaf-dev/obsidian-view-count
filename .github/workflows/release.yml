@@ -33,4 +33,7 @@ jobs:
               with:
                   name: ${{ github.ref_name }}
                   tag_name: ${{ github.ref }}
-                  files: dist/main.js dist/manifest.json dist/styles.css
+                  files: |
+				    dist/main.js
+					dist/manifest.json
+					dist/styles.css
