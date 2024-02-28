@@ -54,7 +54,11 @@ export default class ViewCountPlugin extends Plugin {
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
 
 		this.app.workspace.onLayoutReady(async () => {
-			await new Migrate_050(this, this.app, this.settings).migrate();
+			//If this is the first time installing the plugin
+			//TODO remove this after a few releases. Needed for updating to 0.5.0
+			if (this.settings.pluginVersion === "") {
+				await new Migrate_050(this, this.app, this.settings).migrate();
+			}
 
 			//This needs to be before the migration
 			if (this.settings.pluginVersion !== this.manifest.version) {
