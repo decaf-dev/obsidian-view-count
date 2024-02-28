@@ -9,6 +9,7 @@ import Migrate_050 from './migrate/migrate-0.5.0';
 import Logger from 'js-logger';
 import { LOG_LEVEL_OFF } from './logger/constants';
 import { formatMessageForLogger, stringToLogLevel } from './logger';
+import { startTodayMillis } from './utils/time-utils';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
@@ -94,9 +95,9 @@ export default class ViewCountPlugin extends Plugin {
 			if (incrementOnceADay) {
 				Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
 				const lastViewMillis = await this.storage.getLastViewTime(file);
-				const startTodayMillis = moment().startOf('day').valueOf();
-				if (lastViewMillis >= startTodayMillis) {
-					Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, startTodayMillis });
+				const todayMillis = startTodayMillis();
+				if (lastViewMillis >= todayMillis) {
+					Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
 					return;
 				}
 			}
@@ -124,12 +125,12 @@ export default class ViewCountPlugin extends Plugin {
 			if (incrementOnceADay) {
 				Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
 				const lastViewMillis = await this.storage.getLastViewTime(file);
-				const startTodayMillis = moment().startOf('day').valueOf();
-				if (lastViewMillis < startTodayMillis) {
-					Logger.debug("View count not incremented today. Incrementing view count.", { path: file.path, lastViewMillis, startTodayMillis });
+				const todayMillis = startTodayMillis();
+				if (lastViewMillis < todayMillis) {
+					Logger.debug("View count not incremented today. Incrementing view count.", { path: file.path, lastViewMillis, todayMillis });
 					await this.storage.incrementViewCount(file);
 				} else {
-					Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, startTodayMillis });
+					Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
 				}
 			} else {
 				await this.storage.incrementViewCount(file);

@@ -12,3 +12,7 @@ export const dateToUnixTimeMillis = (date: string) => {
 	const unixTimeMillis = normalTimestamp.valueOf();
 	return unixTimeMillis;
 }
+
+export const startTodayMillis = () => {
+	return moment().startOf('day').valueOf();
+}
