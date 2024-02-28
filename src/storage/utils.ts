@@ -1,5 +1,4 @@
-import { App } from "obsidian";
-import { normalize } from "path";
+import { App, normalizePath } from "obsidian";
 import { ViewCountEntry } from "./types";
 
 export const stringifyEntries = (entries: ViewCountEntry[]) => {
@@ -20,5 +19,5 @@ export const parseEntries = (fileData: string) => {
 
 export const getFilePath = (app: App) => {
 	const VIEW_COUNT_FILE = 'view-count.json';
-	return normalize(app.vault.configDir + "/" + VIEW_COUNT_FILE);
+	return normalizePath(app.vault.configDir + "/" + VIEW_COUNT_FILE);
 }
