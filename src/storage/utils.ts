@@ -1,8 +1,8 @@
 import { App } from "obsidian";
-import { ViewCountEntries } from "./types";
 import { normalize } from "path";
+import { ViewCountEntry } from "./types";
 
-export const stringifyEntries = (entries: ViewCountEntries) => {
+export const stringifyEntries = (entries: ViewCountEntry[]) => {
 	return JSON.stringify({
 		items: entries
 	}, null, 2);

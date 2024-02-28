@@ -1,9 +1,10 @@
 import { Plugin, TFile, moment } from 'obsidian';
 import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
-import FileCache from './file-storage';
-import FileStorage from './file-storage';
-import PropertyStorage from './property-storage';
+import FileStorage from './storage/file-storage';
+import PropertyStorage from './storage/property-storage';
 import { ViewCountPluginSettings } from './types';
+import ViewCountItemView from './obsidian/view-count-item-view';
+import { VIEW_COUNT_ITEM_VIEW } from './constants';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
@@ -14,23 +15,42 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 
 export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings;
-	fileStorage: FileStorage;
-	propertyStorage: PropertyStorage;
+	storage: FileStorage | PropertyStorage;
 	viewCountStatusBarItem?: HTMLElement;
 
 	async onload() {
 		await this.loadSettings();
 
-		if (this.settings.storageType === "property") {
-			this.propertyStorage = new PropertyStorage(this.app, this.settings);
-			await this.registerPropertyStorageEvents();
-		} else {
-			this.fileStorage = new FileCache(this.app);
-			await this.fileStorage.load();
-			await this.registerFileStorageEvents();
+		if (this.settings.storageType === "file") {
+			this.storage = new FileStorage(this.app);
+		} else if (this.settings.storageType === "property") {
+			this.storage = new PropertyStorage(this.app, this.settings);
 		}
 
+		this.registerView(
+			VIEW_COUNT_ITEM_VIEW,
+			(leaf) => new ViewCountItemView(leaf, this.app, this.storage),
+		);
+
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
+
+		this.app.workspace.onLayoutReady(async () => {
+			await this.storage.load();
+
+			if (this.settings.storageType === "file") {
+				await this.registerFileStorageEvents();
+			} else if (this.settings.storageType === "property") {
+				await this.registerPropertyStorageEvents();
+			}
+
+			const leaves = this.app.workspace.getLeavesOfType(VIEW_COUNT_ITEM_VIEW);
+			if (leaves.length === 0) {
+				this.app.workspace.getRightLeaf(false)?.setViewState({
+					type: VIEW_COUNT_ITEM_VIEW,
+					active: false,
+				});
+			}
+		});
 	}
 
 	async registerPropertyStorageEvents() {
@@ -40,13 +60,25 @@ export default class ViewCountPlugin extends Plugin {
 
 			const incrementOnceADay = this.settings.incrementOnceADay;
 			if (incrementOnceADay) {
-				const lastViewedMillis = await this.propertyStorage.getLastViewTime(file);
+				const lastViewedMillis = await this.storage.getLastViewTime(file);
 				const startTodayMillis = moment().startOf('day').valueOf();
 				if (lastViewedMillis >= startTodayMillis) {
 					return;
 				}
 			}
-			await this.propertyStorage.incrementViewCount(file);
+			await this.storage.incrementViewCount(file);
+		}));
+
+		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
+			if (file instanceof TFile) {
+				await this.storage.renameEntry(file.path, oldPath);
+			}
+		}));
+
+		this.registerEvent(this.app.vault.on("delete", async (file) => {
+			if (file instanceof TFile) {
+				this.storage.deleteEntry(file);
+			}
 		}));
 	}
 
@@ -56,32 +88,32 @@ export default class ViewCountPlugin extends Plugin {
 
 			const incrementOnceADay = this.settings.incrementOnceADay;
 			if (incrementOnceADay) {
-				const lastViewedMillis = this.fileStorage.getViewTime(file);
+				const lastViewedMillis = await this.storage.getLastViewTime(file);
 				const startTodayMillis = moment().startOf('day').valueOf();
 				if (lastViewedMillis < startTodayMillis) {
-					await this.fileStorage.incrementViewCount(file);
+					await this.storage.incrementViewCount(file);
 				}
 			} else {
-				await this.fileStorage.incrementViewCount(file);
+				await this.storage.incrementViewCount(file);
 			}
 
 			if (!this.viewCountStatusBarItem) {
 				this.viewCountStatusBarItem = this.addStatusBarItem();
 			}
-			const viewCount = this.fileStorage.getViewCount(file);
+			const viewCount = await this.storage.getViewCount(file);
 			const viewName = viewCount === 1 ? "view" : "views";
 			this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
 		}));
 
 		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
 			if (file instanceof TFile) {
-				await this.fileStorage.renameLastViewed(file.path, oldPath);
+				await this.storage.renameEntry(file.path, oldPath);
 			}
 		}));
 
 		this.registerEvent(this.app.vault.on("delete", async (file) => {
 			if (file instanceof TFile) {
-				this.fileStorage.deleteLastViewed(file);
+				this.storage.deleteEntry(file);
 			}
 		}));
 	}

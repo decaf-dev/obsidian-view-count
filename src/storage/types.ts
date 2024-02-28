@@ -3,5 +3,3 @@ export interface ViewCountEntry {
 	viewCount: number;
 	lastViewMillis: number;
 }
-
-export type ViewCountEntries = ViewCountEntry[];
