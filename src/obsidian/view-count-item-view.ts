@@ -18,7 +18,7 @@ export default class ViewCountItemView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Most viewed";
+		return "View count";
 	}
 
 	getIcon() {
