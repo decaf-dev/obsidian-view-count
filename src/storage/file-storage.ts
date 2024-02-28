@@ -1,6 +1,7 @@
 import { App, Notice, TFile } from "obsidian";
 import { getFilePath, parseEntries, stringifyEntries } from "./utils";
 import ViewCountStorage from "./view-count-storage";
+import Logger from "js-logger";
 
 export default class FileStorage extends ViewCountStorage {
 	private app: App;
@@ -11,13 +12,14 @@ export default class FileStorage extends ViewCountStorage {
 	}
 
 	async load() {
+		Logger.trace("FileStorage load");
 		const path = getFilePath(this.app);
 		const exists = await this.app.vault.adapter.exists(path);
 
 		if (!exists) {
 			const data = stringifyEntries([]);
 			try {
-				//console.log("Creating file cache");
+				Logger.debug("Creating file cache");
 				await this.app.vault.create(path, data);
 			} catch (err) {
 				console.error("Error creating file cache: ", (err as Error).message);
@@ -29,7 +31,7 @@ export default class FileStorage extends ViewCountStorage {
 		try {
 			const result = await this.app.vault.adapter.read(path);
 			this.entries = parseEntries(result);
-			//console.log("Loaded file cache: ", this.entries);
+			Logger.debug("Loaded entries", { entries: this.entries });
 			this.refresh();
 		} catch (err) {
 			console.error("Error loading file cache: ", (err as Error).message);
@@ -38,6 +40,7 @@ export default class FileStorage extends ViewCountStorage {
 	}
 
 	async save(app: App) {
+		Logger.trace("FileStorage save");
 		try {
 			const path = getFilePath(app);
 			const data = stringifyEntries(this.entries);
@@ -49,10 +52,12 @@ export default class FileStorage extends ViewCountStorage {
 	}
 
 	async incrementViewCount(file: TFile) {
-		//console.log("Incrementing view count for file: ", file.path);
+		Logger.trace("FileStorage incrementViewCount");
+		Logger.debug("Incrementing view count for file", { path: file.path });
 		const entry = this.entries.find((entry) => entry.path === file.path);
 
 		if (entry) {
+			Logger.debug("Incrementing existing entry");
 			this.entries = this.entries.map((entry) => {
 				if (entry.path === file.path) {
 					return {
@@ -64,6 +69,7 @@ export default class FileStorage extends ViewCountStorage {
 				return entry;
 			});
 		} else {
+			Logger.debug("Adding new entry");
 			this.entries = [...this.entries, {
 				path: file.path,
 				viewCount: 1,
@@ -84,7 +90,8 @@ export default class FileStorage extends ViewCountStorage {
 	}
 
 	async renameEntry(newPath: string, oldPath: string) {
-		//console.log("Renaming file: ", oldPath, newPath);
+		Logger.trace("FileStorage renameEntry");
+		Logger.debug("Renaming entry", { oldPath, newPath });
 		this.entries = this.entries.map((entry) => {
 			if (entry.path === oldPath) {
 				entry.path = newPath;
@@ -96,7 +103,8 @@ export default class FileStorage extends ViewCountStorage {
 	}
 
 	async deleteEntry(file: TFile) {
-		//console.log("Deleting file: ", file.path);
+		Logger.trace("FileStorage deleteEntry");
+		Logger.debug("Deleting entry", { path: file.path });
 		this.entries = this.entries.filter((entry) => entry.path !== file.path);
 		await this.save(this.app);
 		this.refresh();

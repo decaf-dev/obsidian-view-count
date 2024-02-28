@@ -6,6 +6,9 @@ import { ViewCountPluginSettings } from './types';
 import ViewCountItemView from './obsidian/view-count-item-view';
 import { VIEW_COUNT_ITEM_VIEW } from './constants';
 import Migrate_050 from './migrate/migrate-0.5.0';
+import Logger from 'js-logger';
+import { LOG_LEVEL_OFF } from './logger/constants';
+import { formatMessageForLogger, stringToLogLevel } from './logger';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
@@ -14,6 +17,7 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	lastViewDatePropertyName: "view-date",
 	lastViewTimePropertyName: "last-view-time", //TODO remove this after a few releases. 0.4.1 and prior
 	pluginVersion: "",
+	logLevel: LOG_LEVEL_OFF
 }
 
 export default class ViewCountPlugin extends Plugin {
@@ -23,6 +27,18 @@ export default class ViewCountPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		Logger.useDefaults();
+		Logger.setHandler(function (messages) {
+			const { message, data } = formatMessageForLogger(...messages);
+			console.log(message);
+			if (data) {
+				console.log(data);
+			}
+		});
+
+		const logLevel = stringToLogLevel(this.settings.logLevel);
+		Logger.setLevel(logLevel);
 
 		if (this.settings.storageType === "file") {
 			this.storage = new FileStorage(this.app);

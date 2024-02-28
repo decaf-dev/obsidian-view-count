@@ -2,6 +2,7 @@ import { App, TFile } from "obsidian";
 import { ViewCountPluginSettings } from "src/types";
 import ViewCountStorage from "./view-count-storage";
 import { dateToUnixTimeMillis, unixTimeMillisToDate } from "src/utils/time-utils";
+import Logger from "js-logger";
 
 export default class PropertyStorage extends ViewCountStorage {
 	private app: App;
@@ -14,6 +15,7 @@ export default class PropertyStorage extends ViewCountStorage {
 	}
 
 	async load() {
+		Logger.trace("PropertyStorage load");
 		const { viewCountPropertyName, lastViewDatePropertyName } = this.settings;
 
 		const markdownFiles = this.app.vault.getMarkdownFiles();
@@ -28,11 +30,14 @@ export default class PropertyStorage extends ViewCountStorage {
 				path: file.path
 			})
 		}
+		Logger.debug("Loaded entries", { entries: this.entries });
 		this.refresh();
 
 	}
 
 	async incrementViewCount(file: TFile) {
+		Logger.trace("PropertyStorage incrementViewCount");
+		Logger.debug("Incrementing view count for file", { path: file.path });
 		const { viewCountPropertyName, incrementOnceADay, lastViewDatePropertyName } = this.settings;
 		const entry = this.entries.find((entry) => entry.path === file.path);
 
@@ -57,17 +62,19 @@ export default class PropertyStorage extends ViewCountStorage {
 
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			if (incrementOnceADay) {
+				Logger.debug("Updating view date");
 				const date = unixTimeMillisToDate(Date.now());
 				frontmatter[lastViewDatePropertyName] = date;
 			}
 
 			if (!frontmatter[viewCountPropertyName]) {
+				Logger.debug("Setting view count to 1");
 				frontmatter[viewCountPropertyName] = 1;
 			} else {
+				Logger.debug("Incrementing view count");
 				frontmatter[viewCountPropertyName]++;
 			}
 		});
-		//console.log("Incremented view count for file: ", file.path);
 		this.refresh();
 	}
 
@@ -93,7 +100,8 @@ export default class PropertyStorage extends ViewCountStorage {
 	}
 
 	async renameEntry(newPath: string, oldPath: string) {
-		//console.log("Renaming file: ", oldPath, newPath);
+		Logger.trace("PropertyStorage renameEntry");
+		Logger.debug("Renaming entry", { oldPath, newPath });
 		this.entries = this.entries.map((entry) => {
 			if (entry.path === oldPath) {
 				entry.path = newPath;
@@ -104,7 +112,8 @@ export default class PropertyStorage extends ViewCountStorage {
 	}
 
 	async deleteEntry(file: TFile) {
-		//console.log("Deleting file: ", file.path);
+		Logger.trace("PropertyStorage deleteEntry");
+		Logger.debug("Deleting entry", { path: file.path });
 		this.entries = this.entries.filter((entry) => entry.path !== file.path);
 		this.refresh();
 	}
