@@ -128,6 +128,8 @@ export default class ViewCountPlugin extends Plugin {
 				if (lastViewMillis < startTodayMillis) {
 					Logger.debug("View count not incremented today. Incrementing view count.", { path: file.path, lastViewMillis, startTodayMillis });
 					await this.storage.incrementViewCount(file);
+				} else {
+					Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, startTodayMillis });
 				}
 			} else {
 				await this.storage.incrementViewCount(file);
