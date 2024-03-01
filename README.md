@@ -44,3 +44,32 @@ This plugin has 2 storage options for view count: **Property** and **File**. Ple
 **Increment count once a day** - if enabled a view count will increment once a day. _Once a day_ meaning an opening of a file after 12 am your local time for any given date. If disabled, the view count will increment each time the file is opened.
 
 When increment a day is enabled and the property type is set to storage, a last view date property will be stored to your note.
+
+## Pros/cons for each storage type
+
+### Property storage
+
+#### Pros
+
+-   The property information is stored with your notes, meaning you can uninstall the plugin and still retain this data
+-   Since data is stored in frontmatter, this information can viewed on mobile
+
+#### Cons
+
+-   Only markdown files can have frontmatter keys, so the view count will be only be tracked for markdown files
+
+-   Only markdown files can have frontmatter keys, so the view count will only be tracked for
+
+-   Since the frontmatter keys will update for each view, this may update your files more frequently than you would like
+
+### File storage
+
+#### Pros
+
+-   View count is stored for all file types, including custom extensions
+-   View count is stored in one file, versus scattered across your notes
+
+#### Cons
+
+-   Since the view count is displayed in the status bar, you cannot see the view count on mobile
+-   You may prefer seeing the view count in frontmatter versus in the status bar
