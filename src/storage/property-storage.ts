@@ -24,11 +24,14 @@ export default class PropertyStorage extends ViewCountStorage {
 
 			const date = frontmatter?.[lastViewDatePropertyName] ?? "";
 			const timeMillis = dateToUnixTimeMillis(date);
-			this.entries.push({
-				viewCount: frontmatter?.[viewCountPropertyName] ?? 0,
-				lastViewMillis: timeMillis,
-				path: file.path
-			})
+
+			if (frontmatter?.[viewCountPropertyName] !== undefined) {
+				this.entries.push({
+					viewCount: frontmatter?.[viewCountPropertyName],
+					lastViewMillis: timeMillis,
+					path: file.path
+				})
+			}
 		}
 		Logger.debug("Loaded entries", { entries: this.entries });
 		this.refresh();
