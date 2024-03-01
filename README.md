@@ -51,16 +51,14 @@ When increment a day is enabled and the property type is set to storage, a last 
 
 #### Pros
 
--   The property information is stored with your notes, meaning you can uninstall the plugin and still retain this data
--   Since data is stored in frontmatter, this information can viewed on mobile
+-   The view count information is stored in the frontmatter of each note, making it more accessible
+-   Since the view count is stored in frontmatter, it can be viewed on mobile
 
 #### Cons
 
--   Only markdown files can have frontmatter keys, so the view count will be only be tracked for markdown files
+-   Only markdown files can have frontmatter keys, so view count will be only be tracked for markdown files
 
--   Only markdown files can have frontmatter keys, so the view count will only be tracked for
-
--   Since the frontmatter keys will update for each view, this may update your files more frequently than you would like
+-   Since the frontmatter needs to update every time a view occurs, your files may update frequently than you would like, especially if you stored by recently modified (like me)
 
 ### File storage
 
@@ -72,4 +70,3 @@ When increment a day is enabled and the property type is set to storage, a last 
 #### Cons
 
 -   Since the view count is displayed in the status bar, you cannot see the view count on mobile
--   You may prefer seeing the view count in frontmatter versus in the status bar
