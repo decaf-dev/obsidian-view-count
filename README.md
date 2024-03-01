@@ -13,7 +13,7 @@ This plugin will track the view count for each file in your vault. The count can
 ## Installation
 
 1. In Obsidian, open **Settings**
-2. Go to Community plugins
+2. Go to **Community plugins**
 3. Select **Browse**
 4. Search for **View Count** by Trey Wallis
 5. Select **Install**
