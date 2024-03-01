@@ -1,17 +1,19 @@
 # Obsidian View Count
 
+![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22view-count%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)
+
 ## About
 
 This plugin will track the view count for each file in your vault. The count can be seen as a property or at the bottom of the note in the status bar depending on plugin configuration.
 
 ## Installation
 
-1. Install the [Obsidian BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin from Obsidian community plugin store
-2. Enable the plugin
-3. Open the plugin settings
-4. Click **Add beta plugin**
-5. Enter the repository url: **https://github.com/trey-wallis/obsidian-view-count**
-6. Click **Add plugin**
+1. In Obsidian, open **Settings**
+2. Go to Community plugins
+3. Select **Browse**
+4. Search for **View Count** by Trey Wallis
+5. Select **Install**
+6. Then select **Enable**
 
 ## Usage
 
