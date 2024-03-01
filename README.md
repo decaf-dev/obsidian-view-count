@@ -31,7 +31,7 @@ To see a list of the 20 notes with the highest view count, open the sidebar and 
 
 ### Settings
 
-#### Storage
+#### Storage type
 
 This plugin has 2 storage options for view count: **Property** and **File**. Please restart Obsidian after changing this setting.
 
@@ -45,7 +45,7 @@ This plugin has 2 storage options for view count: **Property** and **File**. Ple
 
 When increment a day is enabled and the property type is set to storage, a last view date property will be stored to your note.
 
-## Pros/cons for each storage type
+## Pros/cons for storage types
 
 ### Property storage
 
