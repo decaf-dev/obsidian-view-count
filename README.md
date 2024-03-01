@@ -6,9 +6,9 @@
 
 This plugin will track the view count for each file in your vault. The count can be seen as a property or at the bottom of the note in the status bar depending on plugin configuration.
 
-![](/readme/property.gif)
+![](/readme/property-storage.gif)
 
-![](/readme/file.gif)
+![](/readme/file-storage.gif)
 
 ## Installation
 
@@ -22,6 +22,12 @@ This plugin will track the view count for each file in your vault. The count can
 ## Usage
 
 By default the plugin will save view count in a property called `view-count` in each file that is opened. The view count will be incremented once a day. To change these settings, please view the **Settings** section below.
+
+### Highest view count
+
+To see a list of the 20 notes with the highest view count, open the sidebar and click on the eye icon
+
+![](/readme/list.png)
 
 ### Settings
 
