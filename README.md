@@ -6,9 +6,9 @@ This plugin will track the view count for each file in your vault. The count can
 
 ![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22view-count%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)
 
-![](/readme/property-storage.gif)
+![](/readme/property.gif)
 
-![](/readme/file-storage.gif)
+![](/readme/file.gif)
 
 ## Installation
 
