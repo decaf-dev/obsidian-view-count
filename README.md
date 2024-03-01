@@ -58,7 +58,7 @@ When increment a day is enabled and the property type is set to storage, a last 
 
 -   Only markdown files can have frontmatter keys, so view count will be only be tracked for markdown files
 
--   Since the frontmatter needs to update every time a view occurs, your files may update frequently than you would like, especially if you stored by recently modified (like me)
+-   Since the frontmatter needs to update every time a view occurs, your files may update frequently than you would like, especially if you sort your files by recently modified (like me)
 
 ### File storage
 
