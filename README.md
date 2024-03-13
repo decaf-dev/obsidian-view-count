@@ -51,22 +51,21 @@ When increment a day is enabled and the property type is set to storage, a last 
 
 #### Pros
 
--   The view count information is stored in the frontmatter of each note, making it more accessible
--   Since the view count is stored in frontmatter, it can be viewed on mobile
+-   The view count is stored in the frontmatter of each note, making it readily accessible
+-   Since the view count is stored in frontmatter, it can also be viewed on mobile
 
 #### Cons
 
--   Only markdown files can have frontmatter keys, so view count will be only be tracked for markdown files
-
--   Since the frontmatter needs to update every time a view occurs, your files may update frequently than you would like, especially if you sort your files by recently modified (like me)
+-   Only markdown files have frontmatter, so only markdown files will have their views tracked
+-   Since the frontmatter updates every time a view occurs, your files may update more frequently than you would like
 
 ### File storage
 
 #### Pros
 
--   View count is stored for all file types, including custom extensions
--   View count is stored in one file, versus scattered across your notes
+-   The view count is tracked for both markdown and canvas files
+-   The view count for your vault is stored in one file, versus scattered across many notes
 
 #### Cons
 
--   Since the view count is displayed in the status bar, you cannot see the view count on mobile
+-   Since view count is displayed in the status bar at the bottom of a note, you cannot see the view count on mobile
