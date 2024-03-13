@@ -2,6 +2,7 @@ import { App, Notice, TFile } from "obsidian";
 import { getFilePath, parseEntries, stringifyEntries } from "./utils";
 import ViewCountStorage from "./view-count-storage";
 import Logger from "js-logger";
+import _ from "lodash";
 
 export default class FileStorage extends ViewCountStorage {
 	private app: App;
@@ -10,6 +11,9 @@ export default class FileStorage extends ViewCountStorage {
 		super();
 		this.app = app;
 	}
+
+	debounceSave = _.debounce(() => this.save(this.app), 200);
+	debounceRefresh = _.debounce(() => this.refresh(), 200);
 
 	async load() {
 		Logger.trace("FileStorage load");
@@ -77,8 +81,8 @@ export default class FileStorage extends ViewCountStorage {
 			}];
 		}
 
-		await this.save(this.app);
-		this.refresh();
+		this.debounceSave();
+		this.debounceRefresh();
 	}
 
 	async getLastViewTime(file: TFile) {
@@ -98,15 +102,17 @@ export default class FileStorage extends ViewCountStorage {
 			}
 			return entry;
 		});
-		await this.save(this.app);
-		this.refresh();
+
+		this.debounceSave();
+		this.debounceRefresh();
 	}
 
 	async deleteEntry(file: TFile) {
 		Logger.trace("FileStorage deleteEntry");
 		Logger.debug("Deleting entry", { path: file.path });
 		this.entries = this.entries.filter((entry) => entry.path !== file.path);
-		await this.save(this.app);
-		this.refresh();
+
+		this.debounceSave();
+		this.debounceRefresh();
 	}
 }
