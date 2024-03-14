@@ -28,10 +28,10 @@ export default class ViewCountItemView extends ItemView {
 	async onOpen() {
 		const { contentEl } = this;
 
-		//Calculate top 20 most viewed notes
+		//Calculate top 50 most viewed notes
 		let sortedEntries = [...this.storage.getEntries()];
 		sortedEntries.sort((a, b) => b.viewCount - a.viewCount);
-		sortedEntries = sortedEntries.slice(0, 20);
+		sortedEntries = sortedEntries.slice(0, 50);
 
 		EventManager.getInstance().on("refresh-item-view", this.handleRefreshEvent);
 
