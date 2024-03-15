@@ -27,6 +27,7 @@ export default class ViewCountItemView extends ItemView {
 
 	async onOpen() {
 		const { contentEl } = this;
+		contentEl.addClass("view-count-view");
 
 		//Calculate top 50 most viewed notes
 		let sortedEntries = [...this.storage.getEntries()];
