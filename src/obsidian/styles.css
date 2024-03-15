@@ -1,3 +1,7 @@
 .view-count-text--emphasize {
 	color: var(--text-accent);
 }
+
+.view-content.view-count-view {
+	padding: var(--size-4-3) var(--size-4-3) var(--size-4-8);
+}
