@@ -5,7 +5,6 @@ import PropertyStorage from './storage/property-storage';
 import { ViewCountPluginSettings } from './types';
 import ViewCountItemView from './obsidian/view-count-item-view';
 import { VIEW_COUNT_ITEM_VIEW } from './constants';
-import Migrate_050 from './migrate/migrate-0.5.0';
 import Logger from 'js-logger';
 import { LOG_LEVEL_OFF } from './logger/constants';
 import { formatMessageForLogger, stringToLogLevel } from './logger';
@@ -16,7 +15,6 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	storageType: "property",
 	viewCountPropertyName: "view-count",
 	lastViewDatePropertyName: "view-date",
-	lastViewTimePropertyName: "last-view-time", //TODO remove this after a few releases. 0.4.1 and prior
 	pluginVersion: "",
 	logLevel: LOG_LEVEL_OFF
 }
@@ -55,12 +53,6 @@ export default class ViewCountPlugin extends Plugin {
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
 
 		this.app.workspace.onLayoutReady(async () => {
-			//If this is the first time installing the plugin
-			//TODO remove this after a few releases. Needed for updating to 0.5.0
-			if (this.settings.pluginVersion === "") {
-				await new Migrate_050(this, this.app, this.settings).migrate();
-			}
-
 			//This needs to be before the migration
 			if (this.settings.pluginVersion !== this.manifest.version) {
 				this.settings.pluginVersion = this.manifest.version;
