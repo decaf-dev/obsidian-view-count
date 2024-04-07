@@ -4,7 +4,6 @@ export interface ViewCountPluginSettings {
 	storageType: "property" | "file";
 	viewCountPropertyName: string;
 	lastViewDatePropertyName: string;
-	lastViewTimePropertyName: string;
 	pluginVersion: string;
 	logLevel: string,
 }
