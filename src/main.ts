@@ -9,6 +9,7 @@ import Logger from 'js-logger';
 import { LOG_LEVEL_OFF } from './logger/constants';
 import { formatMessageForLogger, stringToLogLevel } from './logger';
 import { startTodayMillis } from './utils/time-utils';
+import _ from 'lodash';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
@@ -22,7 +23,10 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings;
 	storage: FileStorage | PropertyStorage;
-	viewCountStatusBarItem?: HTMLElement;
+	viewCountStatusBarItem: HTMLElement | null = null;
+
+	debounceHandleFileStorageOpen = _.debounce(this.handleFileStorageFileOpen, 100);
+	debounceHandlePropertyStorageOpen = _.debounce(this.handlePropertyStorageFileOpen, 100);
 
 	async onload() {
 		await this.loadSettings();
@@ -79,21 +83,20 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	async registerPropertyStorageEvents() {
-		this.registerEvent(this.app.workspace.on("file-open", async (file) => {
-			if (file === null) return;
-			if (file.extension !== "md") return;
+		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
+			if (leaf === null) return;
+			const viewType = leaf.view.getViewType();
+			Logger.debug("Active leaf changed", { viewType });
 
-			const incrementOnceADay = this.settings.incrementOnceADay;
-			if (incrementOnceADay) {
-				Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
-				const lastViewMillis = await this.storage.getLastViewTime(file);
-				const todayMillis = startTodayMillis();
-				if (lastViewMillis >= todayMillis) {
-					Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
-					return;
-				}
+			if (viewType !== "markdown") {
+				Logger.debug("View count not supported for view type", { viewType });
+				return;
 			}
-			await this.storage.incrementViewCount(file);
+
+			const file = this.app.workspace.getActiveFile();
+			if (file === null) return;
+
+			await this.debounceHandlePropertyStorageOpen(file);
 		}));
 
 		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
@@ -110,30 +113,22 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	async registerFileStorageEvents() {
-		this.registerEvent(this.app.workspace.on("file-open", async (file) => {
+		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
+			if (leaf === null) return;
+			const viewType = leaf.view.getViewType();
+			Logger.debug("Active leaf changed", { viewType });
+			if (viewType === "file-explorer") return;
+
+			if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType !== "dataloom") {
+				Logger.debug("View count not supported for view type", { viewType });
+				this.viewCountStatusBarItem?.setText("");
+				return;
+			}
+
+			const file = this.app.workspace.getActiveFile();
 			if (file === null) return;
 
-			const incrementOnceADay = this.settings.incrementOnceADay;
-			if (incrementOnceADay) {
-				Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
-				const lastViewMillis = await this.storage.getLastViewTime(file);
-				const todayMillis = startTodayMillis();
-				if (lastViewMillis < todayMillis) {
-					Logger.debug("View count not incremented today. Incrementing view count.", { path: file.path, lastViewMillis, todayMillis });
-					await this.storage.incrementViewCount(file);
-				} else {
-					Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
-				}
-			} else {
-				await this.storage.incrementViewCount(file);
-			}
-
-			if (!this.viewCountStatusBarItem) {
-				this.viewCountStatusBarItem = this.addStatusBarItem();
-			}
-			const viewCount = await this.storage.getViewCount(file);
-			const viewName = viewCount === 1 ? "view" : "views";
-			this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
+			await this.debounceHandleFileStorageOpen(file);
 		}));
 
 		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
@@ -144,9 +139,47 @@ export default class ViewCountPlugin extends Plugin {
 
 		this.registerEvent(this.app.vault.on("delete", async (file) => {
 			if (file instanceof TFile) {
-				this.storage.deleteEntry(file);
+				await this.storage.deleteEntry(file);
 			}
 		}));
+	}
+
+	private async handlePropertyStorageFileOpen(file: TFile) {
+		const incrementOnceADay = this.settings.incrementOnceADay;
+		if (incrementOnceADay) {
+			Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
+			const lastViewMillis = await this.storage.getLastViewTime(file);
+			const todayMillis = startTodayMillis();
+			if (lastViewMillis >= todayMillis) {
+				Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
+				return;
+			}
+		}
+		await this.storage.incrementViewCount(file);
+	}
+
+	private async handleFileStorageFileOpen(file: TFile) {
+		const incrementOnceADay = this.settings.incrementOnceADay;
+		if (incrementOnceADay) {
+			Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
+			const lastViewMillis = await this.storage.getLastViewTime(file);
+			const todayMillis = startTodayMillis();
+			if (lastViewMillis < todayMillis) {
+				Logger.debug("View count not incremented today. Incrementing view count.", { path: file.path, lastViewMillis, todayMillis });
+				await this.storage.incrementViewCount(file);
+			} else {
+				Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
+			}
+		} else {
+			await this.storage.incrementViewCount(file);
+		}
+
+		if (!this.viewCountStatusBarItem) {
+			this.viewCountStatusBarItem = this.addStatusBarItem();
+		}
+		const viewCount = await this.storage.getViewCount(file);
+		const viewName = viewCount === 1 ? "view" : "views";
+		this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
 	}
 
 
