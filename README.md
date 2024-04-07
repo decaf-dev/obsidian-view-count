@@ -50,7 +50,7 @@ This plugin has 2 storage options for view count: **Property** and **File**. Ple
 
 | Pros                                             | Cons                                |
 | ------------------------------------------------ | ----------------------------------- |
-| View count is tracked all files                  | View count is unavailable on mobile |
+| View count is tracked for all files              | View count is unavailable on mobile |
 | View count is stored in one individual JSON file |                                     |
 
 **Increment count once a day** - if enabled a view count will increment once a day. _Once a day_ meaning an opening of a file after 12 am your local time for any given date. If disabled, the view count will increment each time the file is opened.
