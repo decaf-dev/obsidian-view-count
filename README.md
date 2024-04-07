@@ -2,13 +2,19 @@
 
 ![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22view-count%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)
 
-## About
+View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobile. It allows you to track the view count for each file in your vault.
 
-This plugin tracks the view count for each file in your vault. The count can be seen as a property in your note's frontmatter or at the bottom of the note in the status bar depending on plugin configuration.
+The view count can be seen as a property in the note's frontmatter or at the bottom of the note in the status bar.
 
 ![](/readme/property-storage.gif)
 
 ![](/readme/file-storage.gif)
+
+## About
+
+-   [Installation](#installation)
+-   [Usage](#usage)
+-   [Settings](#settings)
 
 ## Installation
 
@@ -29,43 +35,24 @@ To see a list of the 50 most viewed notes, open the sidebar and click on the eye
 
 ![](/readme/list.png)
 
-### Settings
-
-#### Storage type
+## Settings
 
 This plugin has 2 storage options for view count: **Property** and **File**. Please restart Obsidian after changing this setting.
 
 **Property storage** - If property is selected, each note will have their view count stored in a property in their frontmatter.
 
+| Pros                                                 | Cons                                                     |
+| ---------------------------------------------------- | -------------------------------------------------------- |
+| View count is a part of the frontmatter of each note | Only markdown files can have their views tracked         |
+| View count can be see on mobile                      | Each time a view count is updated, your file is modified |
+
 **File storage** - If file is selected, the view count for all notes will be stored in a JSON file called `view-count.json` in the Obsidian config directory (by default `.obsidian`). The view count will then appear in the status bar at the bottom of each note.
 
-#### Other
+| Pros                                             | Cons                                |
+| ------------------------------------------------ | ----------------------------------- |
+| View count is tracked all files                  | View count is unavailable on mobile |
+| View count is stored in one individual JSON file |                                     |
 
 **Increment count once a day** - if enabled a view count will increment once a day. _Once a day_ meaning an opening of a file after 12 am your local time for any given date. If disabled, the view count will increment each time the file is opened.
 
 When increment a day is enabled and the property type is set to storage, a last view date property will be stored to your note.
-
-## Pros/cons for storage types
-
-### Property storage
-
-#### Pros
-
--   The view count is stored in the frontmatter of each note, making it readily accessible
--   Since the view count is stored in frontmatter, it can also be viewed on mobile
-
-#### Cons
-
--   Only markdown files have frontmatter, so only markdown files will have their views tracked
--   Since the frontmatter updates every time a view occurs, your files may update more frequently than you would like
-
-### File storage
-
-#### Pros
-
--   The view count is tracked for both markdown and canvas files
--   The view count for your vault is stored in one file, versus scattered across many notes
-
-#### Cons
-
--   Since view count is displayed in the status bar at the bottom of a note, you cannot see the view count on mobile
