@@ -119,7 +119,7 @@ export default class ViewCountPlugin extends Plugin {
 			Logger.debug("Active leaf changed", { viewType });
 			if (viewType === "file-explorer") return;
 
-			if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType !== "dataloom") {
+			if (viewType === "vault-explorer") {
 				Logger.debug("View count not supported for view type", { viewType });
 				this.viewCountStatusBarItem?.setText("");
 				return;

@@ -1,4 +1,4 @@
-import { App, ItemView, MarkdownView, TFile, WorkspaceLeaf } from "obsidian";
+import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { VIEW_COUNT_ITEM_VIEW } from "src/constants";
 import EventManager from "src/event/event-manager";
 import ViewCountStorage from "src/storage/view-count-storage";
@@ -58,9 +58,9 @@ export default class ViewCountItemView extends ItemView {
 			flairOuterDiv.createDiv({ cls: "tree-item-flair", text: entry.viewCount.toString() });
 
 			itemDiv.addEventListener("click", () => {
-
+				const type = (this.app as any).viewRegistry.getTypeByExtension(file.extension);
 				this.app.workspace.getLeaf(false)?.setViewState({
-					type: file.extension == "canvas" ? "canvas" : "markdown",
+					type,
 					active: true,
 					state: {
 						file: entry.path,
