@@ -6,4 +6,5 @@ export interface ViewCountPluginSettings {
 	lastViewDatePropertyName: string;
 	pluginVersion: string;
 	logLevel: string,
+	excludedPaths: string[];
 }
