@@ -96,6 +96,15 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+
+		new Setting(containerEl)
+			.setName("Excluded paths")
+			.setDesc("The paths that should be excluded from view count. This setting only works for property storage. Please separate paths by commas. e.g. folder1,folder2/inner")
+			.addText(component => component.setValue(this.plugin.settings.excludedPaths.join(",")).onChange(async (value) => {
+				this.plugin.settings.excludedPaths = value.split(",");
+				await this.plugin.saveSettings();
+			}));
+
 		new Setting(containerEl).setName("Debugging").setHeading();
 		new Setting(containerEl)
 			.setName("Log level")

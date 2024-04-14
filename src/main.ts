@@ -1,4 +1,4 @@
-import { Plugin, TFile, moment } from 'obsidian';
+import { Plugin, TFile, normalizePath } from 'obsidian';
 import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
 import FileStorage from './storage/file-storage';
 import PropertyStorage from './storage/property-storage';
@@ -17,7 +17,8 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	viewCountPropertyName: "view-count",
 	lastViewDatePropertyName: "view-date",
 	pluginVersion: "",
-	logLevel: LOG_LEVEL_OFF
+	logLevel: LOG_LEVEL_OFF,
+	excludedPaths: []
 }
 
 export default class ViewCountPlugin extends Plugin {
@@ -145,7 +146,16 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	private async handlePropertyStorageFileOpen(file: TFile) {
-		const incrementOnceADay = this.settings.incrementOnceADay;
+		const { incrementOnceADay, excludedPaths } = this.settings;
+		if (excludedPaths.find(path => {
+			//Normalize the path so that it will match the file path
+			//This function will remove a forward slash
+			const normalized = normalizePath(path);
+			return file.path.startsWith(normalized)
+		})) {
+			Logger.debug(`File path ${file.path} is included in the excludedPaths array`);
+			return false;
+		}
 		if (incrementOnceADay) {
 			Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
 			const lastViewMillis = await this.storage.getLastViewTime(file);
