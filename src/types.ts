@@ -7,4 +7,5 @@ export interface ViewCountPluginSettings {
 	pluginVersion: string;
 	logLevel: string,
 	excludedPaths: string[];
+	enableTemplaterDelay: boolean;
 }
