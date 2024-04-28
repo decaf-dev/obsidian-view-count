@@ -18,7 +18,8 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	lastViewDatePropertyName: "view-date",
 	pluginVersion: "",
 	logLevel: LOG_LEVEL_OFF,
-	excludedPaths: []
+	excludedPaths: [],
+	enableTemplaterDelay: false,
 }
 
 export default class ViewCountPlugin extends Plugin {
@@ -146,7 +147,7 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	private async handlePropertyStorageFileOpen(file: TFile) {
-		const { incrementOnceADay, excludedPaths } = this.settings;
+		const { incrementOnceADay, excludedPaths, enableTemplaterDelay } = this.settings;
 		if (excludedPaths.find(path => {
 			//Normalize the path so that it will match the file path
 			//This function will remove a forward slash
@@ -163,6 +164,14 @@ export default class ViewCountPlugin extends Plugin {
 			if (lastViewMillis >= todayMillis) {
 				Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
 				return;
+			}
+		}
+		if (enableTemplaterDelay) {
+			//If the file is a new file, it will not be in the storage
+			const entry = this.storage.getEntries().find((entry) => entry.path === file.path);
+			if (!entry) {
+				Logger.debug("Templater delay is enabled. Waiting 1000ms before incrementing view count.");
+				await new Promise(resolve => setTimeout(resolve, 1000));
 			}
 		}
 		await this.storage.incrementViewCount(file);
