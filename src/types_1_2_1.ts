@@ -1,5 +1,5 @@
 
-export interface ViewCountPluginSettings {
+export interface ViewCountPluginSettings_1_2_1 {
 	incrementOnceADay: boolean;
 	storageType: "property" | "file";
 	viewCountPropertyName: string;
@@ -7,5 +7,5 @@ export interface ViewCountPluginSettings {
 	pluginVersion: string;
 	logLevel: string,
 	excludedPaths: string[];
-	templaterDelay: number;
+	enableTemplaterDelay: boolean;
 }

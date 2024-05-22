@@ -10,6 +10,8 @@ import { LOG_LEVEL_OFF } from './logger/constants';
 import { formatMessageForLogger, stringToLogLevel } from './logger';
 import { startTodayMillis } from './utils/time-utils';
 import _ from 'lodash';
+import { isVersionLessThan } from './utils';
+import { ViewCountPluginSettings_1_2_1 } from './types_1_2_1';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	incrementOnceADay: true,
@@ -19,7 +21,7 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	pluginVersion: "",
 	logLevel: LOG_LEVEL_OFF,
 	excludedPaths: [],
-	enableTemplaterDelay: false,
+	templaterDelay: 0,
 }
 
 export default class ViewCountPlugin extends Plugin {
@@ -59,12 +61,6 @@ export default class ViewCountPlugin extends Plugin {
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
 
 		this.app.workspace.onLayoutReady(async () => {
-			//This needs to be before the migration
-			if (this.settings.pluginVersion !== this.manifest.version) {
-				this.settings.pluginVersion = this.manifest.version;
-				await this.saveSettings();
-			}
-
 			//This needs to run before events are setup
 			await this.storage.load();
 
@@ -147,7 +143,7 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	private async handlePropertyStorageFileOpen(file: TFile) {
-		const { incrementOnceADay, excludedPaths, enableTemplaterDelay } = this.settings;
+		const { incrementOnceADay, excludedPaths, templaterDelay } = this.settings;
 		if (excludedPaths.find(path => {
 			//Normalize the path so that it will match the file path
 			//This function will remove a forward slash
@@ -166,12 +162,13 @@ export default class ViewCountPlugin extends Plugin {
 				return;
 			}
 		}
-		if (enableTemplaterDelay) {
+
+		if (templaterDelay > 0) {
 			//If the file is a new file, it will not be in the storage
 			const entry = this.storage.getEntries().find((entry) => entry.path === file.path);
 			if (!entry) {
-				Logger.debug("Templater delay is enabled. Waiting 1000ms before incrementing view count.");
-				await new Promise(resolve => setTimeout(resolve, 1000));
+				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay} before incrementing view count.`);
+				await new Promise(resolve => setTimeout(resolve, templaterDelay));
 			}
 		}
 		await this.storage.incrementViewCount(file);
@@ -207,7 +204,28 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		let data: Record<string, unknown> | null = await this.loadData();
+
+		//Null if the settings are empty
+		if (data !== null) {
+			const settingsVersion = (data["pluginVersion"] as string) ?? null;
+			if (settingsVersion !== null) {
+				if (isVersionLessThan(settingsVersion, "1.2.2")) {
+					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_1;
+					const newData: ViewCountPluginSettings = {
+						...typedData,
+						templaterDelay: 0
+					}
+					data = newData as unknown as Record<string, unknown>;
+				}
+			}
+		}
+
+		//Apply default settings. This will make it so we don't need to do migrations for just adding new settings
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+		//Update the plugin version to the current version
+		this.settings.pluginVersion = this.manifest.version;
+		await this.saveSettings();
 	}
 
 	async saveSettings() {
