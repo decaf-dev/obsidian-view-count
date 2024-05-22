@@ -167,7 +167,7 @@ export default class ViewCountPlugin extends Plugin {
 			//If the file is a new file, it will not be in the storage
 			const entry = this.storage.getEntries().find((entry) => entry.path === file.path);
 			if (!entry) {
-				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay} before incrementing view count.`);
+				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing view count.`);
 				await new Promise(resolve => setTimeout(resolve, templaterDelay));
 			}
 		}
