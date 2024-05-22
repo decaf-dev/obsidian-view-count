@@ -107,14 +107,14 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl).setName("Plugin compatibility").setHeading();
 		new Setting(containerEl)
-			.setName("Enable Templater delay")
+			.setName("Templater delay")
 			.setDesc(
-				"Wait 1000ms before inserting view count frontmatter. Enable this if you're using the Templater plugin and your template is being overwritten"
+				"The delay in milliseconds before inserting view count frontmatter. Increase this value if you're using the Templater plugin and your template is being overwritten"
 			)
-			.addToggle((cb) =>
-				cb.setValue(this.plugin.settings.enableTemplaterDelay).onChange(
+			.addText((component) =>
+				component.setValue(this.plugin.settings.templaterDelay.toString()).onChange(
 					async (value) => {
-						this.plugin.settings.enableTemplaterDelay = value;
+						this.plugin.settings.templaterDelay = parseInt(value);
 						await this.plugin.saveSettings();
 					}
 				)
