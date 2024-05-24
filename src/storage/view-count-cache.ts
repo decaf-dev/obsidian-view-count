@@ -151,7 +151,7 @@ export default class ViewCountCache {
 		}
 	}
 
-	getLastViewTime(file: TFile) {
+	getLastOpenTime(file: TFile) {
 		const entry = this.entries.find((entry) => entry.path === file.path);
 		if (!entry) {
 			return 0;

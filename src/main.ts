@@ -115,13 +115,13 @@ export default class ViewCountPlugin extends Plugin {
 
 		if (viewCountType == "unique-days-opened") {
 			Logger.debug("View count type is set to once a day. Checking if view count should be incremented.");
-			const lastViewMillis = this.viewCountCache.getLastViewTime(file);
+			const lastOpenMillis = this.viewCountCache.getLastOpenTime(file);
 			const startTodayMillis = getStartOfTodayMillis();
-			if (lastViewMillis < startTodayMillis) {
-				Logger.debug("View count has not been incremented today. Incrementing view count.", { path: file.path, lastViewMillis, startTodayMillis });
+			if (lastOpenMillis < startTodayMillis) {
+				Logger.debug("View count has not been incremented today. Incrementing view count.", { path: file.path, lastOpenMillis: lastOpenMillis, startTodayMillis });
 				await this.viewCountCache.incrementViewCount(file);
 			} else {
-				Logger.debug("View count was already incremented today", { path: file.path, lastViewMillis, startTodayMillis });
+				Logger.debug("View count was already incremented today", { path: file.path, lastOpenMillis: lastOpenMillis, startTodayMillis });
 			}
 		} else {
 			await this.viewCountCache.incrementViewCount(file);
