@@ -1,23 +1,21 @@
 import { Plugin, TFile, normalizePath } from 'obsidian';
 import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
-import FileStorage from './storage/file-storage';
-import PropertyStorage from './storage/property-storage';
-import { ViewCountPluginSettings } from './types';
+import { ViewCountPluginSettings, ViewCountPluginSettings_1_2_1, ViewCountPluginSettings_1_2_2 } from './types';
 import ViewCountItemView from './obsidian/view-count-item-view';
 import { VIEW_COUNT_ITEM_VIEW } from './constants';
 import Logger from 'js-logger';
 import { LOG_LEVEL_OFF } from './logger/constants';
 import { formatMessageForLogger, stringToLogLevel } from './logger';
-import { startTodayMillis } from './utils/time-utils';
 import _ from 'lodash';
 import { isVersionLessThan } from './utils';
-import { ViewCountPluginSettings_1_2_1 } from './types_1_2_1';
+import ViewCountCache from './storage/view-count-cache';
+import { getStartOfTodayMillis } from './utils/time-utils';
+import MigrateFileStorage from './migration/migrate-file-storage';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
-	incrementOnceADay: true,
-	storageType: "property",
+	viewCountType: "unique-days-opened",
+	syncViewCountToFrontmatter: false,
 	viewCountPropertyName: "view-count",
-	lastViewDatePropertyName: "view-date",
 	pluginVersion: "",
 	logLevel: LOG_LEVEL_OFF,
 	excludedPaths: [],
@@ -26,15 +24,15 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 
 export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings;
-	storage: FileStorage | PropertyStorage;
 	viewCountStatusBarItem: HTMLElement | null = null;
+	viewCountCache: ViewCountCache;
 
-	debounceHandleFileStorageOpen = _.debounce(this.handleFileStorageFileOpen, 100);
-	debounceHandlePropertyStorageOpen = _.debounce(this.handlePropertyStorageFileOpen, 100);
+	debounceFileOpen = _.debounce(this.handleFileOpen, 100);
 
 	async onload() {
 		await this.loadSettings();
 
+		//Setup logger
 		Logger.useDefaults();
 		Logger.setHandler(function (messages) {
 			const { message, data } = formatMessageForLogger(...messages);
@@ -47,29 +45,20 @@ export default class ViewCountPlugin extends Plugin {
 		const logLevel = stringToLogLevel(this.settings.logLevel);
 		Logger.setLevel(logLevel);
 
-		if (this.settings.storageType === "file") {
-			this.storage = new FileStorage(this.app);
-		} else if (this.settings.storageType === "property") {
-			this.storage = new PropertyStorage(this.app, this.settings);
-		}
+
+		this.viewCountCache = new ViewCountCache(this.app, this.settings);
 
 		this.registerView(
 			VIEW_COUNT_ITEM_VIEW,
-			(leaf) => new ViewCountItemView(leaf, this.app, this.storage),
+			(leaf) => new ViewCountItemView(leaf, this.app, this.viewCountCache),
 		);
 
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
 
+		await this.viewCountCache.load();
+		await this.registerEvents();
+
 		this.app.workspace.onLayoutReady(async () => {
-			//This needs to run before events are setup
-			await this.storage.load();
-
-			if (this.settings.storageType === "file") {
-				await this.registerFileStorageEvents();
-			} else if (this.settings.storageType === "property") {
-				await this.registerPropertyStorageEvents();
-			}
-
 			const leaves = this.app.workspace.getLeavesOfType(VIEW_COUNT_ITEM_VIEW);
 			if (leaves.length === 0) {
 				this.app.workspace.getRightLeaf(false)?.setViewState({
@@ -80,41 +69,14 @@ export default class ViewCountPlugin extends Plugin {
 		});
 	}
 
-	async registerPropertyStorageEvents() {
+	async registerEvents() {
 		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
 			if (leaf === null) return;
 			const viewType = leaf.view.getViewType();
 			Logger.debug("Active leaf changed", { viewType });
 
-			if (viewType !== "markdown") {
-				Logger.debug("View count not supported for view type", { viewType });
-				return;
-			}
 
-			const file = this.app.workspace.getActiveFile();
-			if (file === null) return;
-
-			await this.debounceHandlePropertyStorageOpen(file);
-		}));
-
-		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
-			if (file instanceof TFile) {
-				await this.storage.renameEntry(file.path, oldPath);
-			}
-		}));
-
-		this.registerEvent(this.app.vault.on("delete", async (file) => {
-			if (file instanceof TFile) {
-				this.storage.deleteEntry(file);
-			}
-		}));
-	}
-
-	async registerFileStorageEvents() {
-		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
-			if (leaf === null) return;
-			const viewType = leaf.view.getViewType();
-			Logger.debug("Active leaf changed", { viewType });
+			///TODO fix -This may be causing the view count to increment twice
 			if (viewType === "file-explorer") return;
 
 			if (viewType === "vault-explorer") {
@@ -126,24 +88,24 @@ export default class ViewCountPlugin extends Plugin {
 			const file = this.app.workspace.getActiveFile();
 			if (file === null) return;
 
-			await this.debounceHandleFileStorageOpen(file);
+			await this.debounceFileOpen(file);
 		}));
 
 		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
 			if (file instanceof TFile) {
-				await this.storage.renameEntry(file.path, oldPath);
+				await this.viewCountCache.renameEntry(file.path, oldPath);
 			}
 		}));
 
 		this.registerEvent(this.app.vault.on("delete", async (file) => {
 			if (file instanceof TFile) {
-				await this.storage.deleteEntry(file);
+				await this.viewCountCache.deleteEntry(file);
 			}
 		}));
 	}
 
-	private async handlePropertyStorageFileOpen(file: TFile) {
-		const { incrementOnceADay, excludedPaths, templaterDelay } = this.settings;
+	private async handleFileOpen(file: TFile) {
+		const { excludedPaths, viewCountType } = this.settings;
 		if (excludedPaths.find(path => {
 			//Normalize the path so that it will match the file path
 			//This function will remove a forward slash
@@ -153,47 +115,27 @@ export default class ViewCountPlugin extends Plugin {
 			Logger.debug(`File path ${file.path} is included in the excludedPaths array`);
 			return false;
 		}
-		if (incrementOnceADay) {
-			Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
-			const lastViewMillis = await this.storage.getLastViewTime(file);
-			const todayMillis = startTodayMillis();
-			if (lastViewMillis >= todayMillis) {
-				Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
-				return;
-			}
-		}
 
-		if (templaterDelay > 0) {
-			//If the file is a new file, it will not be in the storage
-			const entry = this.storage.getEntries().find((entry) => entry.path === file.path);
-			if (!entry) {
-				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing view count.`);
-				await new Promise(resolve => setTimeout(resolve, templaterDelay));
-			}
-		}
-		await this.storage.incrementViewCount(file);
-	}
-
-	private async handleFileStorageFileOpen(file: TFile) {
-		const incrementOnceADay = this.settings.incrementOnceADay;
-		if (incrementOnceADay) {
-			Logger.debug("Increment once a day is enabled. Checking if view count should be incremented.");
-			const lastViewMillis = await this.storage.getLastViewTime(file);
-			const todayMillis = startTodayMillis();
-			if (lastViewMillis < todayMillis) {
-				Logger.debug("View count not incremented today. Incrementing view count.", { path: file.path, lastViewMillis, todayMillis });
-				await this.storage.incrementViewCount(file);
+		if (viewCountType == "unique-days-opened") {
+			Logger.debug("View count type is set to once a day. Checking if view count should be incremented.");
+			const lastViewMillis = this.viewCountCache.getLastViewTime(file);
+			const startTodayMillis = getStartOfTodayMillis();
+			if (lastViewMillis < startTodayMillis) {
+				Logger.debug("View count has not been incremented today. Incrementing view count.", { path: file.path, lastViewMillis, startTodayMillis });
+				await this.viewCountCache.incrementViewCount(file);
 			} else {
-				Logger.debug("View count already incremented today", { path: file.path, lastViewMillis, todayMillis });
+				Logger.debug("View count was already incremented today", { path: file.path, lastViewMillis, startTodayMillis });
 			}
 		} else {
-			await this.storage.incrementViewCount(file);
+			await this.viewCountCache.incrementViewCount(file);
 		}
 
 		if (!this.viewCountStatusBarItem) {
 			this.viewCountStatusBarItem = this.addStatusBarItem();
 		}
-		const viewCount = await this.storage.getViewCount(file);
+
+		//Update the view count in the status bar
+		const viewCount = this.viewCountCache.getViewCount(file);
 		const viewName = viewCount === 1 ? "view" : "views";
 		this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
 	}
@@ -212,9 +154,22 @@ export default class ViewCountPlugin extends Plugin {
 			if (settingsVersion !== null) {
 				if (isVersionLessThan(settingsVersion, "1.2.2")) {
 					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_1;
-					const newData: ViewCountPluginSettings = {
+					const newData: ViewCountPluginSettings_1_2_2 = {
 						...typedData,
 						templaterDelay: 0
+					}
+					data = newData as unknown as Record<string, unknown>;
+				}
+				if (isVersionLessThan(settingsVersion, "2.0.0")) {
+					///TODO Create file from property values
+
+					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_2;
+					new MigrateFileStorage().migrateTo2_0_0(this.app, typedData);
+
+					const newData: ViewCountPluginSettings = {
+						...typedData,
+						syncViewCountToFrontmatter: typedData.storageType === "property" ? true : false,
+						viewCountType: typedData.incrementOnceADay ? "unique-days-opened" : "total-times-opened",
 					}
 					data = newData as unknown as Record<string, unknown>;
 				}

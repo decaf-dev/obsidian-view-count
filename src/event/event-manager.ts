@@ -1,3 +1,4 @@
+import Logger from "js-logger";
 import { PluginEvent, EventCallback } from "./types";
 
 export default class EventManager {
@@ -39,7 +40,7 @@ export default class EventManager {
 
 	// Method to trigger all callbacks associated with an event
 	public emit(eventName: PluginEvent, ...data: any[]): void {
-		//console.log("[EventManager] emiting event:", eventName);
+		Logger.debug("[EventManager] emiting event:", eventName);
 		if (!this.eventListeners[eventName]) {
 			return;
 		}
