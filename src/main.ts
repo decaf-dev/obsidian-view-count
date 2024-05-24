@@ -70,16 +70,13 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	async registerEvents() {
+
 		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
 			if (leaf === null) return;
 			const viewType = leaf.view.getViewType();
 			Logger.debug("Active leaf changed", { viewType });
 
-
-			///TODO fix -This may be causing the view count to increment twice
-			if (viewType === "file-explorer") return;
-
-			if (viewType === "vault-explorer") {
+			if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf") {
 				Logger.debug("View count not supported for view type", { viewType });
 				this.viewCountStatusBarItem?.setText("");
 				return;
