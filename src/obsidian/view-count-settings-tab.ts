@@ -21,7 +21,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('View count type')
-			.setDesc("View count can defined 2 ways: the total number of times the file has been opened or the number of unique days the file has been opened.")
+			.setDesc("View count can be defined two ways: the total number of times the file has been opened or the number of unique days the file has been opened.")
 			.addDropdown(component => component
 				.addOption("unique-days-opened", "Unique days opened")
 				.addOption("total-times-opened", "Total times opened")
@@ -34,7 +34,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Excluded paths")
-			.setDesc("The paths that should be excluded from view count. Please separate individual paths by commas. e.g. folder1,folder2/inner")
+			.setDesc("The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. folder1,folder2/inner")
 			.addText(component => component.setValue(this.plugin.settings.excludedPaths.join(",")).onChange(async (value) => {
 				this.plugin.settings.excludedPaths = value.split(",");
 				await this.plugin.saveSettings();
@@ -44,15 +44,15 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		const storageTypeDesc = new DocumentFragment();
 		storageTypeDesc.createDiv({
-			text: "Sync the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.",
+			text: "Save the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.",
 		});
 		new Setting(containerEl)
-			.setName('Sync view count to frontmatter')
+			.setName('Save view count to frontmatter')
 			.setDesc(storageTypeDesc)
 			.addToggle(component => component
-				.setValue(this.plugin.settings.syncViewCountToFrontmatter)
+				.setValue(this.plugin.settings.saveViewCountToFrontmatter)
 				.onChange(async (value) => {
-					this.plugin.settings.syncViewCountToFrontmatter = value;
+					this.plugin.settings.saveViewCountToFrontmatter = value;
 					await this.plugin.saveSettings();
 				}));
 
