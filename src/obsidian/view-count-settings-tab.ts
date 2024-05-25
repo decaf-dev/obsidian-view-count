@@ -21,7 +21,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('View count type')
-			.setDesc("View count can be the total number of times the file has been opened or the number of unique days the file has been opened.")
+			.setDesc("View count can defined 2 ways: the total number of times the file has been opened or the number of unique days the file has been opened.")
 			.addDropdown(component => component
 				.addOption("unique-days-opened", "Unique days opened")
 				.addOption("total-times-opened", "Total times opened")
@@ -34,7 +34,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Excluded paths")
-			.setDesc("The paths that should be excluded from view count. Please separate paths by commas. e.g. folder1,folder2/inner")
+			.setDesc("The paths that should be excluded from view count. Please separate individual paths by commas. e.g. folder1,folder2/inner")
 			.addText(component => component.setValue(this.plugin.settings.excludedPaths.join(",")).onChange(async (value) => {
 				this.plugin.settings.excludedPaths = value.split(",");
 				await this.plugin.saveSettings();
@@ -44,7 +44,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		const storageTypeDesc = new DocumentFragment();
 		storageTypeDesc.createDiv({
-			text: "Sync the view count to a frontmatter property for each note. This makes the view count available for query through the DataView plugin.",
+			text: "Sync the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.",
 		});
 		new Setting(containerEl)
 			.setName('Sync view count to frontmatter')
