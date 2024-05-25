@@ -10,7 +10,8 @@ import _ from 'lodash';
 import { isVersionLessThan } from './utils';
 import ViewCountCache from './storage/view-count-cache';
 import { getStartOfTodayMillis } from './utils/time-utils';
-import MigrateFileStorage from './migration/migrate-file-storage';
+import { migrateFileStorage } from './migration/migrate-file-storage';
+import { migratePropertyStorage } from './migration/migrate-property-storage';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	viewCountType: "unique-days-opened",
@@ -26,6 +27,7 @@ export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings;
 	viewCountStatusBarItem: HTMLElement | null = null;
 	viewCountCache: ViewCountCache;
+	settings_1_2_2: ViewCountPluginSettings_1_2_2 | null = null;
 
 	debounceFileOpen = _.debounce(this.handleFileOpen, 100);
 
@@ -55,10 +57,18 @@ export default class ViewCountPlugin extends Plugin {
 
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
 
-		await this.viewCountCache.load();
+		if (this.settings_1_2_2?.storageType != "property") {
+			await this.viewCountCache.load();
+		}
+
 		await this.registerEvents();
 
 		this.app.workspace.onLayoutReady(async () => {
+			if (this.settings_1_2_2?.storageType == "property") {
+				await migratePropertyStorage(this.app, this.settings_1_2_2);
+				await this.viewCountCache.load();
+			}
+
 			const leaves = this.app.workspace.getLeavesOfType(VIEW_COUNT_ITEM_VIEW);
 			if (leaves.length === 0) {
 				this.app.workspace.getRightLeaf(false)?.setViewState({
@@ -70,7 +80,6 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	async registerEvents() {
-
 		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
 			if (leaf === null) return;
 			const viewType = leaf.view.getViewType();
@@ -102,6 +111,7 @@ export default class ViewCountPlugin extends Plugin {
 	}
 
 	private async handleFileOpen(file: TFile) {
+		Logger.trace("handleFileOpen");
 		const { excludedPaths, viewCountType } = this.settings;
 		if (excludedPaths.find(path => {
 			//Normalize the path so that it will match the file path
@@ -114,14 +124,14 @@ export default class ViewCountPlugin extends Plugin {
 		}
 
 		if (viewCountType == "unique-days-opened") {
-			Logger.debug("View count type is set to once a day. Checking if view count should be incremented.");
+			Logger.debug("View count type set to 'unique-days-opened'. Checking if view count should be incremented.");
 			const lastOpenMillis = this.viewCountCache.getLastOpenTime(file);
 			const startTodayMillis = getStartOfTodayMillis();
 			if (lastOpenMillis < startTodayMillis) {
-				Logger.debug("View count has not been incremented today. Incrementing view count.", { path: file.path, lastOpenMillis: lastOpenMillis, startTodayMillis });
+				Logger.debug("View count has not been incremented today. Incrementing view count.");
 				await this.viewCountCache.incrementViewCount(file);
 			} else {
-				Logger.debug("View count was already incremented today", { path: file.path, lastOpenMillis: lastOpenMillis, startTodayMillis });
+				Logger.debug("View count was already incremented today. Returning...");
 			}
 		} else {
 			await this.viewCountCache.incrementViewCount(file);
@@ -158,10 +168,10 @@ export default class ViewCountPlugin extends Plugin {
 					data = newData as unknown as Record<string, unknown>;
 				}
 				if (isVersionLessThan(settingsVersion, "2.0.0")) {
-					///TODO Create file from property values
-
 					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_2;
-					new MigrateFileStorage().migrateTo2_0_0(this.app, typedData);
+					this.settings_1_2_2 = structuredClone(typedData);
+
+					await migrateFileStorage(this.app, typedData);
 
 					const newData: ViewCountPluginSettings = {
 						...typedData,
