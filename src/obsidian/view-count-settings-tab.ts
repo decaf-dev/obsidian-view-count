@@ -19,55 +19,80 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		const viewCountTypeDesc = new DocumentFragment();
+		viewCountTypeDesc.createDiv({
+			text: "View count can be defined two ways: the total number of times the file has been opened or the number of unique days the file has been opened.",
+		});
+		viewCountTypeDesc.createEl("br");
+		viewCountTypeDesc.createDiv({
+			text: "Warning: if you change this setting and you have 'Save view count to frontmatter' enabled, the view count property in all relevant notes will be updated.",
+			cls: "view-count-text--warning",
+		});
+
+		new Setting(containerEl)
+			.setName('View count type')
+			.setDesc(viewCountTypeDesc)
+			.addDropdown(component => component
+				.addOption("unique-days-opened", "Unique days opened")
+				.addOption("total-times-opened", "Total times opened")
+				.setValue(this.plugin.settings.viewCountType)
+				.onChange(async (value) => {
+					this.plugin.settings.viewCountType = value as "unique-days-opened" | "total-times-opened";
+					await this.plugin.saveSettings();
+
+					if (this.plugin.settings.saveViewCountToFrontmatter) {
+						await this.plugin.viewCountCache.syncFrontmatterToViewCount();
+					}
+					await this.plugin.viewCountCache.debounceRefresh();
+				}));
+
+
+		new Setting(containerEl)
+			.setName("Excluded paths")
+			.setDesc("The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. folder1,folder2/inner")
+			.addText(component => component.setValue(this.plugin.settings.excludedPaths.join(",")).onChange(async (value) => {
+				this.plugin.settings.excludedPaths = value.split(",");
+				await this.plugin.saveSettings();
+			}));
+
+		new Setting(containerEl).setName("Frontmatter").setHeading();
 
 		const storageTypeDesc = new DocumentFragment();
 		storageTypeDesc.createDiv({
-			text: "If property is selected, each note will have their view count stored in a property in their frontmatter. If file is selected, the view count for all notes will be stored in a file in the Obsidian config directory.",
+			text: "Save the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.",
 		});
 		storageTypeDesc.createEl("br");
 		storageTypeDesc.createDiv({
-			text: "Please restart Obsidian after changing this setting.",
-			cls: "view-count-text--emphasize",
+			text: "Warning: once you enable this setting, the view count property in all relevant notes will be updated.",
+			cls: "view-count-text--warning",
 		});
+
 		new Setting(containerEl)
-			.setName('Storage type')
+			.setName('Save view count to frontmatter')
 			.setDesc(storageTypeDesc)
-			.addDropdown(component => component
-				.addOptions({
-					'property': 'Property',
-					'file': 'File',
-				})
-				.setValue(this.plugin.settings.storageType)
-				.onChange(async (value) => {
-					this.plugin.settings.storageType = value as unknown as "property" | "file";
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Increment once a day')
-			.setDesc('If enabled a file view count will only be incremented once a day. Otherwise, the file view count will be incremented every time it is opened.')
 			.addToggle(component => component
-				.setValue(this.plugin.settings.incrementOnceADay)
+				.setValue(this.plugin.settings.saveViewCountToFrontmatter)
 				.onChange(async (value) => {
-					this.plugin.settings.incrementOnceADay = value;
-					await this.plugin.saveSettings();
-				}));
+					this.plugin.settings.saveViewCountToFrontmatter = value;
 
+					await this.plugin.saveSettings();
+					await this.plugin.viewCountCache.syncFrontmatterToViewCount();
+				}));
 
 		const viewCountDesc = new DocumentFragment();
 		viewCountDesc.createDiv({
-			text: "The name of the property that the view count will be stored in. This is only used if the storage type is set to property.",
+			text: "The name of the property that the view count will be stored in.",
 		});
 		viewCountDesc.createEl("br");
 		viewCountDesc.createDiv({
-			text: "Please rename the existing property before updating this setting. You can use the rename option in the All Properties view in the sidebar to do this.",
+			text: "Notice: Please rename the existing property before updating this setting. You can use the rename option in the 'All Properties' view in the sidebar to do this.",
 			cls: "view-count-text--emphasize",
 		});
+
 
 		new Setting(containerEl)
 			.setName('View count property name')
 			.setDesc(viewCountDesc)
-			.setDisabled(this.plugin.settings.storageType !== "property")
 			.addText(text => text
 				.setValue(this.plugin.settings.viewCountPropertyName)
 				.onChange(async (value) => {
@@ -75,35 +100,6 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		const viewDateDesc = new DocumentFragment();
-		viewDateDesc.createDiv({
-			text: "The name of the property that the last view date will be stored in. This is only used if increment once a day is enabled.",
-		});
-		viewDateDesc.createEl("br");
-		viewDateDesc.createDiv({
-			text: "Please rename the existing property before updating this setting. You can use the rename option in the All Properties view in the sidebar to do this.",
-			cls: "view-count-text--emphasize",
-		});
-
-		new Setting(containerEl)
-			.setName('View date property name')
-			.setDesc(viewDateDesc)
-			.setDisabled(this.plugin.settings.storageType !== "property" || !this.plugin.settings.incrementOnceADay)
-			.addText(text => text
-				.setValue(this.plugin.settings.lastViewDatePropertyName)
-				.onChange(async (value) => {
-					this.plugin.settings.lastViewDatePropertyName = value;
-					await this.plugin.saveSettings();
-				}));
-
-
-		new Setting(containerEl)
-			.setName("Excluded paths")
-			.setDesc("The paths that should be excluded from view count. This setting only works for property storage. Please separate paths by commas. e.g. folder1,folder2/inner")
-			.addText(component => component.setValue(this.plugin.settings.excludedPaths.join(",")).onChange(async (value) => {
-				this.plugin.settings.excludedPaths = value.split(",");
-				await this.plugin.saveSettings();
-			}));
 
 		new Setting(containerEl).setName("Plugin compatibility").setHeading();
 		new Setting(containerEl)
@@ -113,7 +109,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 			)
 			.addDropdown((cb) => {
 				cb.addOptions({
-					"0": "Off",
+					"0": "0",
 					"1000": "1000",
 					"2000": "2000",
 					"3000": "3000",
@@ -127,6 +123,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					}
 				)
 			});
+
 
 		new Setting(containerEl).setName("Debugging").setHeading();
 		new Setting(containerEl)

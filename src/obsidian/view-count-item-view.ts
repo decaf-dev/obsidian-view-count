@@ -1,16 +1,16 @@
 import { App, ItemView, WorkspaceLeaf } from "obsidian";
 import { VIEW_COUNT_ITEM_VIEW } from "src/constants";
 import EventManager from "src/event/event-manager";
-import ViewCountStorage from "src/storage/view-count-storage";
+import ViewCountCache from "src/storage/view-count-cache";
 
 export default class ViewCountItemView extends ItemView {
 	app: App;
-	storage: ViewCountStorage;
+	cache: ViewCountCache;
 
-	constructor(leaf: WorkspaceLeaf, app: App, storage: ViewCountStorage) {
+	constructor(leaf: WorkspaceLeaf, app: App, cache: ViewCountCache) {
 		super(leaf);
 		this.app = app;
-		this.storage = storage;
+		this.cache = cache;
 	}
 
 	getViewType() {
@@ -30,8 +30,8 @@ export default class ViewCountItemView extends ItemView {
 		contentEl.addClass("view-count-view");
 
 		//Calculate top 50 most viewed notes
-		let sortedEntries = [...this.storage.getEntries()];
-		sortedEntries.sort((a, b) => b.viewCount - a.viewCount);
+		let sortedEntries = [...this.cache.getEntries()];
+		sortedEntries.sort((a, b) => this.cache.getViewCountForEntry(b) - this.cache.getViewCountForEntry(a));
 		sortedEntries = sortedEntries.slice(0, 50);
 
 		EventManager.getInstance().on("refresh-item-view", this.handleRefreshEvent);
@@ -55,13 +55,13 @@ export default class ViewCountItemView extends ItemView {
 			innerDiv.createDiv({ cls: "tree-item-inner-text", text: displayName });
 
 			const flairOuterDiv = itemDiv.createDiv({ cls: "tree-item-flair-outer" });
-			flairOuterDiv.createDiv({ cls: "tree-item-flair", text: entry.viewCount.toString() });
+			flairOuterDiv.createDiv({ cls: "tree-item-flair", text: this.cache.getViewCountForEntry(entry).toString() });
 
 			itemDiv.addEventListener("click", () => {
 				const type = (this.app as any).viewRegistry.getTypeByExtension(file.extension);
 				this.app.workspace.getLeaf(false)?.setViewState({
 					type,
-					active: true,
+					active: false,
 					state: {
 						file: entry.path,
 					},
@@ -78,7 +78,6 @@ export default class ViewCountItemView extends ItemView {
 	}
 
 	private handleRefreshEvent = () => {
-		// console.log("Refreshing view count item view");
 		this.onClose();
 		this.onOpen();
 	}

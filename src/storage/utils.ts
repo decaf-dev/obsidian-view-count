@@ -7,7 +7,7 @@ export const stringifyEntries = (entries: ViewCountEntry[]) => {
 	}, null, 2);
 }
 
-export const parseEntries = (fileData: string) => {
+export const parseEntries = <T>(fileData: string): T[] => {
 	const json = JSON.parse(fileData);
 
 	if (!json.items)

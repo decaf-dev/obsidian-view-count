@@ -13,6 +13,10 @@ export const dateToUnixTimeMillis = (date: string) => {
 	return unixTimeMillis;
 }
 
-export const startTodayMillis = () => {
+export const getStartOfTodayMillis = () => {
 	return moment().startOf('day').valueOf();
+}
+
+export const getStartOf31DaysAgoMillis = () => {
+	return moment().subtract(31, 'days').startOf('day').valueOf();
 }
