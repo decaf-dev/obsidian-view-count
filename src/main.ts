@@ -32,6 +32,8 @@ export default class ViewCountPlugin extends Plugin {
 	debounceFileOpen = _.debounce(this.handleFileOpen, 100);
 
 	async onload() {
+		await this.loadSettings();
+
 		//Setup logger
 		Logger.useDefaults();
 		Logger.setHandler(function (messages) {
@@ -44,8 +46,6 @@ export default class ViewCountPlugin extends Plugin {
 
 		const logLevel = stringToLogLevel(this.settings.logLevel);
 		Logger.setLevel(logLevel);
-
-		await this.loadSettings();
 
 		this.viewCountCache = new ViewCountCache(this.app, this.settings);
 
@@ -159,6 +159,7 @@ export default class ViewCountPlugin extends Plugin {
 			const settingsVersion = (data["pluginVersion"] as string) ?? null;
 			if (settingsVersion !== null) {
 				if (isVersionLessThan(settingsVersion, "1.2.2")) {
+					console.log("Migrating settings from 1.2.1 to 1.2.2");
 					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_1;
 					const newData: ViewCountPluginSettings_1_2_2 = {
 						...typedData,
@@ -167,6 +168,7 @@ export default class ViewCountPlugin extends Plugin {
 					data = newData as unknown as Record<string, unknown>;
 				}
 				if (isVersionLessThan(settingsVersion, "2.0.0")) {
+					console.log("Migrating settings from 1.2.2 to 2.0.0");
 					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_2;
 
 					const newData: ViewCountPluginSettings = {

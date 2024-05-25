@@ -5,7 +5,7 @@ import { getFilePath, stringifyEntries } from "src/storage/utils";
 import { ViewCountPluginSettings_1_2_2 } from "src/types";
 
 export const migratePropertyStorage = async (app: App, settings: ViewCountPluginSettings_1_2_2) => {
-	Logger.info("Migrating property storage from 1.2.2 to 2.0.0");
+	console.log("Migrating property storage");
 	const { viewCountPropertyName, lastViewDatePropertyName, incrementOnceADay } = settings;
 
 	const files = app.vault.getMarkdownFiles();
@@ -24,11 +24,11 @@ export const migratePropertyStorage = async (app: App, settings: ViewCountPlugin
 			]
 		}
 	});
-	Logger.debug("New entries", newEntries);
+	console.log("New entries", newEntries);
 
 	const path = getFilePath(app);
 
 	const data = stringifyEntries(newEntries);
 	await app.vault.adapter.write(path, data);
-	Logger.info("Migration complete");
+	console.log("Migration complete");
 }
