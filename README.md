@@ -27,7 +27,9 @@ The view count can be seen as a property in the note's frontmatter or at the bot
 
 ## Usage
 
-By default the plugin will save view count in a property called `view-count` in each file that is opened. The view count will be incremented once a day. To change these settings, please view the **Settings** section below.
+Once you enable the plugin, view count data will start being tracked. You can see the view count on desktop on the status bar in the down righthand corner.
+
+If you would like to view the view count on mobile, you will need to enable the **Save view count to frontmatter** setting.
 
 ### Most viewed notes
 
@@ -46,6 +48,8 @@ A unique day is considered an opening of a file after 12 am your local time.
 **Excluded paths** - The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. `folder1,folder2/inner`
 
 **Save view count to frontmatter** - Save the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.
+
+This setting makes view count available on mobile. In the near feature, this will not be needed.
 
 The view count information for all files is stored in `.obsidian/view-count.json`. This setting is optional, as it duplicates data that already exists. However, it makes the view count more accessible for [DataView](https://obsidian.md/plugins?id=dataview) and other plugins because it is available in the frontmatter of the note.
 
