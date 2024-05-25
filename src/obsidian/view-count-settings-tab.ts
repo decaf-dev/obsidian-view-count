@@ -19,9 +19,19 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		const viewCountTypeDesc = new DocumentFragment();
+		viewCountTypeDesc.createDiv({
+			text: "View count can be defined two ways: the total number of times the file has been opened or the number of unique days the file has been opened.",
+		});
+		viewCountTypeDesc.createEl("br");
+		viewCountTypeDesc.createDiv({
+			text: "Warning: if you change this setting and you have 'Save view to frontmatter' enabled, the view count property in all relevant notes will be updated.",
+			cls: "view-count-text--warning",
+		});
+
 		new Setting(containerEl)
 			.setName('View count type')
-			.setDesc("View count can be defined two ways: the total number of times the file has been opened or the number of unique days the file has been opened.")
+			.setDesc(viewCountTypeDesc)
 			.addDropdown(component => component
 				.addOption("unique-days-opened", "Unique days opened")
 				.addOption("total-times-opened", "Total times opened")
@@ -46,6 +56,12 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		storageTypeDesc.createDiv({
 			text: "Save the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.",
 		});
+		storageTypeDesc.createEl("br");
+		storageTypeDesc.createDiv({
+			text: "Warning: once you enable this setting, the view count property in all relevant notes will be updated.",
+			cls: "view-count-text--warning",
+		});
+
 		new Setting(containerEl)
 			.setName('Save view count to frontmatter')
 			.setDesc(storageTypeDesc)
@@ -62,7 +78,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		});
 		viewCountDesc.createEl("br");
 		viewCountDesc.createDiv({
-			text: "Please rename the existing property before updating this setting. You can use the rename option in the All Properties view in the sidebar to do this.",
+			text: "Notice: Please rename the existing property before updating this setting. You can use the rename option in the 'All Properties' view in the sidebar to do this.",
 			cls: "view-count-text--emphasize",
 		});
 
