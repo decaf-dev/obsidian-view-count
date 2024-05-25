@@ -40,7 +40,8 @@ export default class EventManager {
 
 	// Method to trigger all callbacks associated with an event
 	public emit(eventName: PluginEvent, ...data: any[]): void {
-		Logger.debug("[EventManager] emiting event:", eventName);
+		Logger.trace("EventManager emit");
+		Logger.debug("Emiting event", eventName);
 		if (!this.eventListeners[eventName]) {
 			return;
 		}
