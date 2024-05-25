@@ -84,7 +84,7 @@ export default class ViewCountPlugin extends Plugin {
 			const viewType = leaf.view.getViewType();
 			Logger.debug("Active leaf changed", { viewType });
 
-			if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf") {
+			if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType != "dataloom" && viewType != "audio" && viewType != "video") {
 				Logger.debug("View count not supported for view type", { viewType });
 				this.viewCountStatusBarItem?.setText("");
 				return;
