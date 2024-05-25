@@ -11,6 +11,7 @@ export const migrateFileStorage = async (app: App, settings: ViewCountPluginSett
 		Logger.info("Migrating file storage from 1.2.2 to 2.0.0");
 		const fileData = await app.vault.adapter.read(path);
 		const entries = parseEntries<ViewCountEntry_1_2_2>(fileData);
+		Logger.debug("Old entries", entries);
 
 		const { incrementOnceADay } = settings;
 		const newEntries: ViewCountEntry[] = entries.map(entry => {
@@ -25,6 +26,8 @@ export const migrateFileStorage = async (app: App, settings: ViewCountPluginSett
 				]
 			}
 		});
+		Logger.debug("New entries", entries);
+
 		const data = stringifyEntries(newEntries);
 		await app.vault.adapter.write(path, data);
 		Logger.info("Migration complete");
