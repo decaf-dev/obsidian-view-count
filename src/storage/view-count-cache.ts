@@ -104,10 +104,13 @@ export default class ViewCountCache {
 			}];
 		}
 
+		this.debounceSave();
+		this.debounceRefresh();
+
 		const { viewCountPropertyName, syncViewCountToFrontmatter, templaterDelay, viewCountType } = this.settings;
 		if (syncViewCountToFrontmatter) {
 			if (!doesEntryExist && templaterDelay > 0) {
-				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing view count.`);
+				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
 				await new Promise(resolve => setTimeout(resolve, templaterDelay));
 			}
 
@@ -119,18 +122,14 @@ export default class ViewCountCache {
 
 			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 				if (viewCountType === "unique-days-opened") {
-					Logger.debug("Updating frontmatter", { path: file.path, uniqueDaysOpened: entry.uniqueDaysOpened });
+					Logger.debug("Updating view count property", { path: file.path, viewCountPropertyName, viewCount: entry.uniqueDaysOpened, type: "unique-days-opened" });
 					frontmatter[viewCountPropertyName] = entry.uniqueDaysOpened;
 				} else {
-					Logger.debug("Updating frontmatter", { path: file.path, totalTimesOpened: entry.totalTimesOpened });
+					Logger.debug("Updating view count property", { path: file.path, viewCountPropertyName, viewCount: entry.totalTimesOpened, type: "total-times-opened" });
 					frontmatter[viewCountPropertyName] = entry.totalTimesOpened;
 				}
 			});
 		}
-
-
-		this.debounceSave();
-		this.debounceRefresh();
 	}
 
 	getViewCount(file: TFile) {

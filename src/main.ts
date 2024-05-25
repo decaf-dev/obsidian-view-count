@@ -169,9 +169,6 @@ export default class ViewCountPlugin extends Plugin {
 				}
 				if (isVersionLessThan(settingsVersion, "2.0.0")) {
 					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_2;
-					this.settings_1_2_2 = structuredClone(typedData);
-
-					await migrateFileStorage(this.app, typedData);
 
 					const newData: ViewCountPluginSettings = {
 						...typedData,
@@ -179,6 +176,9 @@ export default class ViewCountPlugin extends Plugin {
 						viewCountType: typedData.incrementOnceADay ? "unique-days-opened" : "total-times-opened",
 					}
 					data = newData as unknown as Record<string, unknown>;
+
+					this.settings_1_2_2 = structuredClone(typedData);
+					await migrateFileStorage(this.app, typedData);
 				}
 			}
 		}
