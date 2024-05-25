@@ -43,6 +43,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					if (this.plugin.settings.saveViewCountToFrontmatter) {
 						await this.plugin.viewCountCache.syncFrontmatterToViewCount();
 					}
+					await this.plugin.viewCountCache.debounceRefresh();
 				}));
 
 
