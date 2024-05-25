@@ -63,7 +63,7 @@ export default class ViewCountCache {
 
 	async incrementViewCount(file: TFile) {
 		Logger.trace("ViewCountCache incrementViewCount");
-		Logger.debug("Increment view count for file:", { path: file.path });
+		Logger.debug("Incrementing view count for file:", { path: file.path });
 
 		const entry = this.entries.find((entry) => entry.path === file.path);
 
