@@ -32,8 +32,6 @@ export default class ViewCountPlugin extends Plugin {
 	debounceFileOpen = _.debounce(this.handleFileOpen, 100);
 
 	async onload() {
-		await this.loadSettings();
-
 		//Setup logger
 		Logger.useDefaults();
 		Logger.setHandler(function (messages) {
@@ -47,6 +45,7 @@ export default class ViewCountPlugin extends Plugin {
 		const logLevel = stringToLogLevel(this.settings.logLevel);
 		Logger.setLevel(logLevel);
 
+		await this.loadSettings();
 
 		this.viewCountCache = new ViewCountCache(this.app, this.settings);
 
@@ -61,7 +60,7 @@ export default class ViewCountPlugin extends Plugin {
 			await this.viewCountCache.load();
 		}
 
-		await this.registerEvents();
+		this.registerEvents();
 
 		this.app.workspace.onLayoutReady(async () => {
 			if (this.settings_1_2_2?.storageType == "property") {
@@ -79,7 +78,7 @@ export default class ViewCountPlugin extends Plugin {
 		});
 	}
 
-	async registerEvents() {
+	registerEvents() {
 		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
 			if (leaf === null) return;
 			const viewType = leaf.view.getViewType();

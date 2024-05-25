@@ -5,7 +5,6 @@ import { getFilePath, stringifyEntries } from "src/storage/utils";
 import { ViewCountPluginSettings_1_2_2 } from "src/types";
 
 export const migratePropertyStorage = async (app: App, settings: ViewCountPluginSettings_1_2_2) => {
-
 	Logger.info("Migrating property storage from 1.2.2 to 2.0.0");
 	const { viewCountPropertyName, lastViewDatePropertyName, incrementOnceADay } = settings;
 
