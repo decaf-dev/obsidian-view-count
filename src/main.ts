@@ -128,13 +128,14 @@ export default class ViewCountPlugin extends Plugin {
 			const startTodayMillis = getStartOfTodayMillis();
 			if (lastOpenMillis < startTodayMillis) {
 				Logger.debug("View count has not been incremented today. Incrementing view count.");
-				await this.viewCountCache.incrementViewCount(file);
+				this.viewCountCache.incrementViewCount(file);
 			} else {
 				Logger.debug("View count was already incremented today. Returning...");
 			}
 		} else {
-			await this.viewCountCache.incrementViewCount(file);
+			this.viewCountCache.incrementViewCount(file);
 		}
+		this.viewCountCache.syncViewCountToFrontmatter(file);
 
 		if (!this.viewCountStatusBarItem) {
 			this.viewCountStatusBarItem = this.addStatusBarItem();
