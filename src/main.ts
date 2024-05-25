@@ -85,17 +85,17 @@ export default class ViewCountPlugin extends Plugin {
 			await this.debounceFileOpen(file);
 		}));
 
-		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
-			if (leaf === null) return;
-			const viewType = leaf.view.getViewType();
-			// Logger.debug("Active leaf changed", { viewType });
+		// this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
+		// 	if (leaf === null) return;
+		// 	const viewType = leaf.view.getViewType();
+		// 	// Logger.debug("Active leaf changed", { viewType });
 
-			if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType != "dataloom" && viewType != "audio" && viewType != "video") {
-				Logger.debug("View count not supported for view type", { viewType });
-				this.viewCountStatusBarItem?.setText("");
-				return;
-			}
-		}));
+		// 	if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType != "dataloom" && viewType != "audio" && viewType != "video") {
+		// 		Logger.debug("View count not supported for view type", { viewType });
+		// 		this.viewCountStatusBarItem?.setText("");
+		// 		return;
+		// 	}
+		// }));
 
 		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
 			if (file instanceof TFile) {
