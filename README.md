@@ -4,8 +4,6 @@
 
 View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobile. It allows you to track the view count for each file in your vault.
 
-The view count can be seen as a property in the note's frontmatter or at the bottom of the note in the status bar.
-
 ![](/readme/property-storage.gif)
 
 ![](/readme/file-storage.gif)
@@ -27,7 +25,9 @@ The view count can be seen as a property in the note's frontmatter or at the bot
 
 ## Usage
 
-Once you enable the plugin, view count data will start being tracked. You can see the view count on desktop on the status bar in the down righthand corner.
+Once you enable the plugin, view count data will start being tracked. You can see the view count on desktop in the status bar in the bottom righthand corner.
+
+There are 2 different definitions for a view count. Please see **View count type** setting section below.
 
 If you would like to view the view count on mobile, you will need to enable the **Save view count to frontmatter** setting.
 
@@ -49,7 +49,7 @@ A unique day is considered an opening of a file after 12 am your local time.
 
 **Save view count to frontmatter** - Save the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.
 
-This setting makes view count available on mobile. In the near feature, this will not be needed.
+This setting makes view count available on mobile. In the future, this setting will not be needed for mobile viewing.
 
 The view count information for all files is stored in `.obsidian/view-count.json`. This setting is optional, as it duplicates data that already exists. However, it makes the view count more accessible for [DataView](https://github.com/blacksmithgu/obsidian-dataview) and other plugins because it is available in the frontmatter of the note.
 
