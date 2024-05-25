@@ -106,15 +106,17 @@ export default class ViewCountCache {
 		this.debounceRefresh();
 
 
-		const { templaterDelay } = this.settings;
+		const { templaterDelay, saveViewCountToFrontmatter } = this.settings;
 
-		//If we're creating a new file and the templater delay is greater than 0, wait before updating the view count property in frontmatter
-		//This is to prevent the view count from overwriting the templater output
-		if (!entry && templaterDelay > 0) {
-			Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
-			await new Promise(resolve => setTimeout(resolve, templaterDelay));
+		if (saveViewCountToFrontmatter) {
+			//If we're creating a new file and the templater delay is greater than 0, wait before updating the view count property in frontmatter
+			//This is to prevent the view count from overwriting the templater output
+			if (!entry && templaterDelay > 0) {
+				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
+				await new Promise(resolve => setTimeout(resolve, templaterDelay));
+			}
+			await this.updateViewCountProperty(file);
 		}
-		await this.updateViewCountProperty(file);
 	}
 
 	getViewCount(file: TFile) {
