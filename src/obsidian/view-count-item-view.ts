@@ -61,7 +61,7 @@ export default class ViewCountItemView extends ItemView {
 				const type = (this.app as any).viewRegistry.getTypeByExtension(file.extension);
 				this.app.workspace.getLeaf(false)?.setViewState({
 					type,
-					active: false,
+					active: true,
 					state: {
 						file: entry.path,
 					},
