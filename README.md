@@ -51,7 +51,7 @@ A unique day is considered an opening of a file after 12 am your local time.
 
 This setting makes view count available on mobile. In the near feature, this will not be needed.
 
-The view count information for all files is stored in `.obsidian/view-count.json`. This setting is optional, as it duplicates data that already exists. However, it makes the view count more accessible for [DataView](https://obsidian.md/plugins?id=dataview) and other plugins because it is available in the frontmatter of the note.
+The view count information for all files is stored in `.obsidian/view-count.json`. This setting is optional, as it duplicates data that already exists. However, it makes the view count more accessible for [DataView](https://github.com/blacksmithgu/obsidian-dataview) and other plugins because it is available in the frontmatter of the note.
 
 **View count property name** - The name of the property that the view will be stored in.
 
