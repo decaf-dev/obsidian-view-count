@@ -25,7 +25,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		});
 		viewCountTypeDesc.createEl("br");
 		viewCountTypeDesc.createDiv({
-			text: "Warning: if you change this setting and you have 'Save view to frontmatter' enabled, the view count property in all relevant notes will be updated.",
+			text: "Warning: if you change this setting and you have 'Save view count to frontmatter' enabled, the view count property in all relevant notes will be updated.",
 			cls: "view-count-text--warning",
 		});
 
@@ -39,6 +39,10 @@ class ViewCountSettingsTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.viewCountType = value as "unique-days-opened" | "total-times-opened";
 					await this.plugin.saveSettings();
+
+					if (this.plugin.settings.saveViewCountToFrontmatter) {
+						await this.plugin.viewCountCache.syncFrontmatterToViewCount();
+					}
 				}));
 
 
@@ -69,7 +73,9 @@ class ViewCountSettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.saveViewCountToFrontmatter)
 				.onChange(async (value) => {
 					this.plugin.settings.saveViewCountToFrontmatter = value;
+
 					await this.plugin.saveSettings();
+					await this.plugin.viewCountCache.syncFrontmatterToViewCount();
 				}));
 
 		const viewCountDesc = new DocumentFragment();

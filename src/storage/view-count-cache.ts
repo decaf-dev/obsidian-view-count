@@ -52,7 +52,6 @@ export default class ViewCountCache {
 	async save() {
 		Logger.trace("ViewCountCache save");
 		try {
-			Logger.debug("Saving view count entries", { entries: this.entries });
 			const path = getFilePath(this.app);
 			const data = stringifyEntries(this.entries);
 			await this.app.vault.adapter.write(path, data);
@@ -62,11 +61,12 @@ export default class ViewCountCache {
 		}
 	}
 
-	incrementViewCount(file: TFile) {
+	async incrementViewCount(file: TFile) {
 		Logger.trace("ViewCountCache incrementViewCount");
 		Logger.debug("Increment view count for file:", { path: file.path });
 
 		const entry = this.entries.find((entry) => entry.path === file.path);
+
 		if (entry) {
 			this.entries = this.entries.map((entry) => {
 				if (entry.path === file.path) {
@@ -104,33 +104,17 @@ export default class ViewCountCache {
 
 		this.debounceSave();
 		this.debounceRefresh();
-	}
 
-	async syncViewCountToFrontmatter(file: TFile) {
-		const { viewCountPropertyName, saveViewCountToFrontmatter, templaterDelay, viewCountType } = this.settings;
-		if (!saveViewCountToFrontmatter) {
-			return;
-		}
 
-		const entry = this.entries.find((entry) => entry.path === file.path);
-		if (!entry) {
-			throw new Error("Entry not found");
-		}
+		const { templaterDelay } = this.settings;
 
+		//If we're creating a new file and the templater delay is greater than 0, wait before updating the view count property in frontmatter
+		//This is to prevent the view count from overwriting the templater output
 		if (!entry && templaterDelay > 0) {
 			Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
 			await new Promise(resolve => setTimeout(resolve, templaterDelay));
 		}
-
-		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			if (viewCountType === "unique-days-opened") {
-				Logger.debug("Updating view count property in frontmatter", { path: file.path, viewCountPropertyName, viewCount: entry.uniqueDaysOpened, type: "unique-days-opened" });
-				frontmatter[viewCountPropertyName] = entry.uniqueDaysOpened;
-			} else {
-				Logger.debug("Updating view count property in frontmatter", { path: file.path, viewCountPropertyName, viewCount: entry.totalTimesOpened, type: "total-times-opened" });
-				frontmatter[viewCountPropertyName] = entry.totalTimesOpened;
-			}
-		});
+		await this.updateViewCountProperty(file);
 	}
 
 	getViewCount(file: TFile) {
@@ -186,6 +170,51 @@ export default class ViewCountCache {
 
 	getEntries() {
 		return this.entries;
+	}
+
+	async syncFrontmatterToViewCount() {
+		Logger.trace("ViewCountCache syncFrontmatterToViewCount");
+
+		const { saveViewCountToFrontmatter } = this.settings;
+		for (const entry of this.entries) {
+			const file = this.app.vault.getFileByPath(entry.path);
+			if (!file) continue;
+
+			if (saveViewCountToFrontmatter) {
+				await this.updateViewCountProperty(file);
+			} else {
+				await this.deleteViewCountProperty(file);
+
+			}
+		}
+	}
+
+	private async updateViewCountProperty(file: TFile) {
+		const { viewCountPropertyName, viewCountType } = this.settings;
+
+		const entry = this.entries.find((entry) => entry.path === file.path);
+		if (!entry) {
+			throw new Error("Entry not found for file");
+		}
+
+		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (viewCountType === "unique-days-opened") {
+				Logger.debug("Updating view count property in frontmatter", { path: file.path, viewCountPropertyName, viewCount: entry.uniqueDaysOpened, type: "unique-days-opened" });
+				frontmatter[viewCountPropertyName] = entry.uniqueDaysOpened;
+			} else {
+				Logger.debug("Updating view count property in frontmatter", { path: file.path, viewCountPropertyName, viewCount: entry.totalTimesOpened, type: "total-times-opened" });
+				frontmatter[viewCountPropertyName] = entry.totalTimesOpened;
+			}
+		});
+	}
+
+	private async deleteViewCountProperty(file: TFile) {
+		Logger.trace("ViewCountCache deleteViewCountPropertyInFrontmatter");
+		const { viewCountPropertyName } = this.settings;
+		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			console.log(frontmatter[viewCountPropertyName]);
+			frontmatter[viewCountPropertyName] = undefined;
+		});
 	}
 
 	private refresh() {

@@ -135,7 +135,6 @@ export default class ViewCountPlugin extends Plugin {
 		} else {
 			this.viewCountCache.incrementViewCount(file);
 		}
-		this.viewCountCache.syncViewCountToFrontmatter(file);
 
 		if (!this.viewCountStatusBarItem) {
 			this.viewCountStatusBarItem = this.addStatusBarItem();
