@@ -15,7 +15,7 @@ import { migratePropertyStorage } from './migration/migrate-property-storage';
 
 const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	viewCountType: "unique-days-opened",
-	syncViewCountToFrontmatter: false,
+	saveViewCountToFrontmatter: false,
 	viewCountPropertyName: "view-count",
 	pluginVersion: "",
 	logLevel: LOG_LEVEL_OFF,
@@ -172,7 +172,7 @@ export default class ViewCountPlugin extends Plugin {
 
 					const newData: ViewCountPluginSettings = {
 						...typedData,
-						syncViewCountToFrontmatter: typedData.storageType === "property" ? true : false,
+						saveViewCountToFrontmatter: typedData.storageType === "property" ? true : false,
 						viewCountType: typedData.incrementOnceADay ? "unique-days-opened" : "total-times-opened",
 					}
 					data = newData as unknown as Record<string, unknown>;

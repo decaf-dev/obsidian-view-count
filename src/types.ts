@@ -2,7 +2,7 @@
 
 export interface ViewCountPluginSettings {
 	viewCountType: "unique-days-opened" | "total-times-opened";
-	syncViewCountToFrontmatter: boolean;
+	saveViewCountToFrontmatter: boolean;
 	viewCountPropertyName: string;
 	pluginVersion: string;
 	logLevel: string,

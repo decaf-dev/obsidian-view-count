@@ -107,8 +107,8 @@ export default class ViewCountCache {
 		this.debounceSave();
 		this.debounceRefresh();
 
-		const { viewCountPropertyName, syncViewCountToFrontmatter, templaterDelay, viewCountType } = this.settings;
-		if (syncViewCountToFrontmatter) {
+		const { viewCountPropertyName, saveViewCountToFrontmatter, templaterDelay, viewCountType } = this.settings;
+		if (saveViewCountToFrontmatter) {
 			if (!doesEntryExist && templaterDelay > 0) {
 				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
 				await new Promise(resolve => setTimeout(resolve, templaterDelay));
