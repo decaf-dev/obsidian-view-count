@@ -4,8 +4,8 @@
 	"version": "2.0.2",
 	"minAppVersion": "1.4.0",
 	"description": "Tracks view count for each vault file.",
-	"author": "Trey Wallis",
-	"authorUrl": "https://github.com/trey-wallis",
-	"fundingUrl": "https://buymeacoffee.com/treywallis",
+	"author": "DecafDev",
+	"authorUrl": "https://github.com/decaf-dev",
+	"fundingUrl": "https://buymeacoffee.com/decaf_dev",
 	"isDesktopOnly": false
 }

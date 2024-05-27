@@ -19,7 +19,7 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 1. In Obsidian, open **Settings**
 2. Go to **Community plugins**
 3. Select **Browse**
-4. Search for **View Count** by Trey Wallis
+4. Search for **View Count** by DecafDev
 5. Select **Install**
 6. Then select **Enable**
 
