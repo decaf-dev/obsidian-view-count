@@ -62,19 +62,20 @@ export default class ViewCountPlugin extends Plugin {
 
 		this.registerEvents();
 
+		this.addCommand({
+			id: "open-view-count-pane",
+			name: "Open view count pane",
+			callback: () => {
+				this.openViewCountPane(true);
+			}
+		});
+
 		this.app.workspace.onLayoutReady(async () => {
 			if (this.settings_1_2_2?.storageType == "property") {
 				await migratePropertyStorage(this.app, this.settings_1_2_2);
 				await this.viewCountCache.load();
 			}
-
-			const leaves = this.app.workspace.getLeavesOfType(VIEW_COUNT_ITEM_VIEW);
-			if (leaves.length === 0) {
-				this.app.workspace.getRightLeaf(false)?.setViewState({
-					type: VIEW_COUNT_ITEM_VIEW,
-					active: false,
-				});
-			}
+			this.openViewCountPane(false);
 		});
 	}
 
@@ -194,5 +195,15 @@ export default class ViewCountPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	private openViewCountPane(active: boolean) {
+		const leaves = this.app.workspace.getLeavesOfType(VIEW_COUNT_ITEM_VIEW);
+		if (leaves.length === 0) {
+			this.app.workspace.getRightLeaf(false)?.setViewState({
+				type: VIEW_COUNT_ITEM_VIEW,
+				active,
+			});
+		}
 	}
 }
