@@ -63,8 +63,8 @@ export default class ViewCountPlugin extends Plugin {
 		this.registerEvents();
 
 		this.addCommand({
-			id: "open-view-count-pane",
-			name: "Open view count pane",
+			id: "open-view-count",
+			name: "Open view count",
 			callback: () => {
 				this.openViewCountPane(true);
 			}
