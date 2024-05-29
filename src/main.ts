@@ -64,7 +64,7 @@ export default class ViewCountPlugin extends Plugin {
 
 		this.addCommand({
 			id: "open-view-count",
-			name: "Open view count",
+			name: "Open view count pane",
 			callback: () => {
 				this.openViewCountPane(true);
 			}
