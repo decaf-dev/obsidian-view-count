@@ -24,12 +24,12 @@ const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 }
 
 export default class ViewCountPlugin extends Plugin {
-	settings: ViewCountPluginSettings;
-	viewCountStatusBarItem: HTMLElement | null = null;
-	viewCountCache: ViewCountCache;
+	settings: ViewCountPluginSettings = DEFAULT_SETTINGS;
+	viewCountCache: ViewCountCache | null = null;
 	settings_1_2_2: ViewCountPluginSettings_1_2_2 | null = null;
+	viewCountStatusBarItem: HTMLElement | null = null;
 
-	debounceFileOpen = _.debounce(this.handleFileOpen, 100);
+	debounceHandleFileOpen = _.debounce(this.handleFileOpen, 100);
 
 	async onload() {
 		await this.loadSettings();
@@ -47,11 +47,12 @@ export default class ViewCountPlugin extends Plugin {
 		const logLevel = stringToLogLevel(this.settings.logLevel);
 		Logger.setLevel(logLevel);
 
-		this.viewCountCache = new ViewCountCache(this.app, this.settings);
+		const viewCountCache = new ViewCountCache(this.app, this.settings);
+		this.viewCountCache = viewCountCache;
 
 		this.registerView(
 			VIEW_COUNT_ITEM_VIEW,
-			(leaf) => new ViewCountItemView(leaf, this.app, this.viewCountCache),
+			(leaf) => new ViewCountItemView(leaf, this.app, viewCountCache),
 		);
 
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
@@ -73,81 +74,11 @@ export default class ViewCountPlugin extends Plugin {
 		this.app.workspace.onLayoutReady(async () => {
 			if (this.settings_1_2_2?.storageType == "property") {
 				await migratePropertyStorage(this.app, this.settings_1_2_2);
-				await this.viewCountCache.load();
+				await viewCountCache.load();
 			}
 			this.openViewCountPane(false);
 		});
 	}
-
-	registerEvents() {
-		this.registerEvent(this.app.workspace.on("file-open", async (file) => {
-			// const file = this.app.workspace.getActiveFile();
-			if (file === null) return;
-			await this.debounceFileOpen(file);
-		}));
-
-		// this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
-		// 	if (leaf === null) return;
-		// 	const viewType = leaf.view.getViewType();
-		// 	// Logger.debug("Active leaf changed", { viewType });
-
-		// 	if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType != "dataloom" && viewType != "audio" && viewType != "video") {
-		// 		Logger.debug("View count not supported for view type", { viewType });
-		// 		this.viewCountStatusBarItem?.setText("");
-		// 		return;
-		// 	}
-		// }));
-
-		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
-			if (file instanceof TFile) {
-				await this.viewCountCache.renameEntry(file.path, oldPath);
-			}
-		}));
-
-		this.registerEvent(this.app.vault.on("delete", async (file) => {
-			if (file instanceof TFile) {
-				await this.viewCountCache.deleteEntry(file);
-			}
-		}));
-	}
-
-	private async handleFileOpen(file: TFile) {
-		Logger.trace("handleFileOpen");
-		const { excludedPaths, viewCountType } = this.settings;
-		if (excludedPaths.find(path => {
-			//Normalize the path so that it will match the file path
-			//This function will remove a forward slash
-			const normalized = normalizePath(path);
-			return file.path.startsWith(normalized)
-		})) {
-			Logger.debug(`File path ${file.path} is included in the excludedPaths array`);
-			return false;
-		}
-
-		if (viewCountType == "unique-days-opened") {
-			Logger.debug("View count type set to 'unique-days-opened'. Checking if view count should be incremented.");
-			const lastOpenMillis = this.viewCountCache.getLastOpenTime(file);
-			const startTodayMillis = getStartOfTodayMillis();
-			if (lastOpenMillis < startTodayMillis) {
-				Logger.debug("View count has not been incremented today. Incrementing view count.");
-				this.viewCountCache.incrementViewCount(file);
-			} else {
-				Logger.debug("View count was already incremented today. Returning...");
-			}
-		} else {
-			this.viewCountCache.incrementViewCount(file);
-		}
-
-		if (!this.viewCountStatusBarItem) {
-			this.viewCountStatusBarItem = this.addStatusBarItem();
-		}
-
-		//Update the view count in the status bar
-		const viewCount = this.viewCountCache.getViewCount(file);
-		const viewName = viewCount === 1 ? "view" : "views";
-		this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
-	}
-
 
 	onunload() {
 		this.viewCountStatusBarItem?.remove();
@@ -197,6 +128,43 @@ export default class ViewCountPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	private registerEvents() {
+		const cache = this.viewCountCache;
+		if (cache === null) {
+			throw new Error("View count cache is null");
+		}
+
+		this.registerEvent(this.app.workspace.on("file-open", async (file) => {
+			if (file === null) return;
+			await this.debounceHandleFileOpen(file);
+		}));
+
+		//TODO don't show view count for views that don't support it
+		// this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
+		// 	if (leaf === null) return;
+		// 	const viewType = leaf.view.getViewType();
+		// 	// Logger.debug("Active leaf changed", { viewType });
+
+		// 	if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType != "dataloom" && viewType != "audio" && viewType != "video") {
+		// 		Logger.debug("View count not supported for view type", { viewType });
+		// 		this.viewCountStatusBarItem?.setText("");
+		// 		return;
+		// 	}
+		// }));
+
+		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
+			if (file instanceof TFile) {
+				await cache.renameEntry(file.path, oldPath);
+			}
+		}));
+
+		this.registerEvent(this.app.vault.on("delete", async (file) => {
+			if (file instanceof TFile) {
+				await cache.deleteEntry(file);
+			}
+		}));
+	}
+
 	private openViewCountPane(active: boolean) {
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_COUNT_ITEM_VIEW);
 		if (leaves.length === 0) {
@@ -205,5 +173,47 @@ export default class ViewCountPlugin extends Plugin {
 				active,
 			});
 		}
+	}
+
+
+	private async handleFileOpen(file: TFile) {
+		if (this.viewCountCache === null) {
+			throw new Error("View count cache is null");
+		}
+
+		Logger.trace("handleFileOpen");
+		const { excludedPaths, viewCountType } = this.settings;
+		if (excludedPaths.find(path => {
+			//Normalize the path so that it will match the file path
+			//This function will remove a forward slash
+			const normalized = normalizePath(path);
+			return file.path.startsWith(normalized)
+		})) {
+			Logger.debug(`File path ${file.path} is included in the excludedPaths array`);
+			return false;
+		}
+
+		if (viewCountType == "unique-days-opened") {
+			Logger.debug("View count type set to 'unique-days-opened'. Checking if view count should be incremented.");
+			const lastOpenMillis = this.viewCountCache.getLastOpenTime(file);
+			const startTodayMillis = getStartOfTodayMillis();
+			if (lastOpenMillis < startTodayMillis) {
+				Logger.debug("View count has not been incremented today. Incrementing view count.");
+				this.viewCountCache.incrementViewCount(file);
+			} else {
+				Logger.debug("View count was already incremented today. Returning...");
+			}
+		} else {
+			this.viewCountCache.incrementViewCount(file);
+		}
+
+		if (!this.viewCountStatusBarItem) {
+			this.viewCountStatusBarItem = this.addStatusBarItem();
+		}
+
+		//Update the view count in the status bar
+		const viewCount = this.viewCountCache.getViewCount(file);
+		const viewName = viewCount === 1 ? "view" : "views";
+		this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
 	}
 }

@@ -13,6 +13,7 @@ export default class ViewCountItemView extends ItemView {
 		super(leaf);
 		this.app = app;
 		this.cache = cache;
+		this.component = null;
 	}
 
 	getViewType() {

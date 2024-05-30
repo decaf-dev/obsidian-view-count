@@ -60,7 +60,7 @@
 
 		let entryFiles: Map<ViewCountEntry, TFile> = new Map();
 		sortedEntries.forEach((entry) => {
-			const file = this.app.vault.getFileByPath(entry.path);
+			const file = pluginStore.app.vault.getFileByPath(entry.path);
 			if (file !== null) {
 				entryFiles.set(entry, file);
 			}
@@ -83,7 +83,7 @@
 
 		let entryFiles: Map<ViewCountEntry, TFile> = new Map();
 		sortedEntries.forEach((entry) => {
-			const file = this.app.vault.getFileByPath(entry.path);
+			const file = pluginStore.app.vault.getFileByPath(entry.path);
 			if (file !== null) {
 				entryFiles.set(entry, file);
 			}
