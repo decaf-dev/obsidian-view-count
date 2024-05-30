@@ -20,3 +20,11 @@ export const getStartOfTodayMillis = () => {
 export const getStartOf31DaysAgoMillis = () => {
 	return moment().subtract(31, 'days').startOf('day').valueOf();
 }
+
+export const getStartOf30DaysAgoMillis = () => {
+	return moment().subtract(30, 'days').startOf('day').valueOf();
+}
+
+export const getStartOfMonthMillis = () => {
+	return moment().startOf('month').valueOf();
+}

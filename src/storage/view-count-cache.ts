@@ -128,6 +128,7 @@ export default class ViewCountCache {
 		}
 	}
 
+
 	getViewCountForEntry = (entry: ViewCountEntry) => {
 		const { viewCountType } = this.settings;
 		if (viewCountType === "unique-days-opened") {
@@ -135,6 +136,16 @@ export default class ViewCountCache {
 		} else {
 			return entry.totalTimesOpened;
 		}
+	}
+
+	getTimesOpenedThisMonth(entry: ViewCountEntry) {
+		const startOfMonthMillis = getStartOfTodayMillis();
+		return entry.openLogs.filter((log) => log.timestampMillis >= startOfMonthMillis).length;
+	}
+
+	getTimesOpenedLast30Days(entry: ViewCountEntry) {
+		const start30DaysAgoMillis = getStartOfTodayMillis();
+		return entry.openLogs.filter((log) => log.timestampMillis >= start30DaysAgoMillis).length;
 	}
 
 	getLastOpenTime(file: TFile) {
@@ -174,7 +185,7 @@ export default class ViewCountCache {
 		return this.entries;
 	}
 
-	getSortedEntries(sortDir: "asc" | "desc") {
+	getEntriesSortedByViewCount(sortDir: "asc" | "desc") {
 		let entriesCopy = [...this.entries];
 		entriesCopy.sort(
 			(a, b) => {

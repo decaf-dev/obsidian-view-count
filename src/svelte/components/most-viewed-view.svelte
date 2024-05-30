@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { TFile } from "obsidian";
-	import { RenderItem } from "../types";
+	import { MostViewedRenderItem } from "../types";
 	import { createEventDispatcher } from "svelte";
 
-	export let renderItems: RenderItem[];
+	export let renderItems: MostViewedRenderItem[];
 	const dispatch = createEventDispatcher();
 
 	function handleItemClick(file: TFile) {

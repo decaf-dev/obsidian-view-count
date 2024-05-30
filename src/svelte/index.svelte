@@ -1,23 +1,29 @@
 <script lang="ts">
 	import { TFile, setIcon } from "obsidian";
 	import { onMount } from "svelte";
-	import "./styles.css";
 	import store, { ViewCountPluginStore } from "./store";
 	import EventManager from "src/event/event-manager";
 	import { ViewCountEntry } from "src/storage/types";
-	import { RenderItem } from "./types";
 	import MostViewedView from "./components/most-viewed-view.svelte";
+	import TrendingView from "./components/trending-view.svelte";
+	import { MostViewedRenderItem, TrendingRenderItem } from "./types";
+
+	import "./styles.css";
+
+	type ViewType = "most-viewed" | "trending";
 
 	let trendingIconRef: HTMLElement | null = null;
 	let mostViewedIconRef: HTMLElement | null = null;
-	let currentView: "most-viewed" | "trending" = "most-viewed";
-	let renderItems: RenderItem[] = [];
+	let currentView: ViewType = "most-viewed";
+	let mostViewedRenderItems: MostViewedRenderItem[] = [];
+	let trendingRenderItems: TrendingRenderItem[] = [];
 
 	let pluginStore: ViewCountPluginStore;
 
 	store.pluginStore.subscribe((store) => {
 		pluginStore = store;
-		updateRenderItems();
+		updateMostViewedItems();
+		updateTrendingItems();
 	});
 
 	onMount(() => {
@@ -30,11 +36,13 @@
 		}
 	});
 
+	//TODO add a timer to update trending items?
+
 	onMount(() => {
+		//TODO optimize event. Don't update all items?
 		function handleRefreshEvent() {
-			//TODO optimize
-			//don't update all items
-			updateRenderItems();
+			updateMostViewedItems();
+			updateTrendingItems();
 		}
 
 		EventManager.getInstance().on("refresh-item-view", handleRefreshEvent);
@@ -46,8 +54,9 @@
 		};
 	});
 
-	function updateRenderItems() {
-		let sortedEntries = pluginStore.cache.getSortedEntries("desc");
+	function updateMostViewedItems() {
+		let sortedEntries =
+			pluginStore.cache.getEntriesSortedByViewCount("desc");
 
 		let entryFiles: Map<ViewCountEntry, TFile> = new Map();
 		sortedEntries.forEach((entry) => {
@@ -56,14 +65,42 @@
 				entryFiles.set(entry, file);
 			}
 		});
-		let items: RenderItem[] = Array.from(entryFiles.entries()).map(
+
+		let items: MostViewedRenderItem[] = Array.from(
+			entryFiles.entries(),
+		).map(([entry, file]) => {
+			const viewCount = pluginStore.cache.getViewCountForEntry(entry);
+			return { file, viewCount };
+		});
+
+		items = items.slice(0, 50);
+		mostViewedRenderItems = items;
+	}
+
+	function updateTrendingItems() {
+		let sortedEntries =
+			pluginStore.cache.getEntriesSortedByViewCount("desc");
+
+		let entryFiles: Map<ViewCountEntry, TFile> = new Map();
+		sortedEntries.forEach((entry) => {
+			const file = this.app.vault.getFileByPath(entry.path);
+			if (file !== null) {
+				entryFiles.set(entry, file);
+			}
+		});
+
+		let items: TrendingRenderItem[] = Array.from(entryFiles.entries()).map(
 			([entry, file]) => {
-				const viewCount = pluginStore.cache.getViewCountForEntry(entry);
-				return { file, viewCount };
+				const timesOpened =
+					pluginStore.cache.getTimesOpenedLast30Days(entry);
+				return { file, timesOpened: timesOpened };
 			},
 		);
+		items.sort((a, b) => b.timesOpened - a.timesOpened);
+		items = items.filter((item) => item.timesOpened > 0);
+
 		items = items.slice(0, 50);
-		renderItems = items;
+		trendingRenderItems = items;
 	}
 
 	function handleMostViewedClick() {
@@ -74,10 +111,7 @@
 		currentView = "trending";
 	}
 
-	function getNavActionButtonClass(
-		currentView: "most-viewed" | "trending",
-		view: "most-viewed" | "trending",
-	) {
+	function getNavActionButtonClass(currentView: ViewType, view: ViewType) {
 		let className = "clickable-icon nav-action-button";
 		if (currentView === view) {
 			return `${className} is-active`;
@@ -109,10 +143,10 @@
 <div class="nav-header">
 	<div class="nav-buttons-container">
 		<div
+			class={mostViewedClassName}
 			tabindex="0"
 			role="button"
 			aria-label="Most Viewed"
-			class={mostViewedClassName}
 			bind:this={mostViewedIconRef}
 			on:click={handleMostViewedClick}
 			on:keydown={(e) => {
@@ -122,10 +156,10 @@
 			}}
 		></div>
 		<div
+			class={trendingClassName}
 			tabindex="0"
 			role="button"
 			aria-label="Trending"
-			class={trendingClassName}
 			bind:this={trendingIconRef}
 			on:click={handleTrendingClick}
 			on:keydown={(e) => {
@@ -138,9 +172,15 @@
 </div>
 <div class="view-content view-count-view">
 	{#if currentView === "most-viewed"}
-		<MostViewedView {renderItems} on:itemClick={handleItemClick} />
+		<MostViewedView
+			renderItems={mostViewedRenderItems}
+			on:itemClick={handleItemClick}
+		/>
 	{/if}
 	{#if currentView === "trending"}
-		<p>Trending notes</p>
+		<TrendingView
+			renderItems={trendingRenderItems}
+			on:itemClick={handleItemClick}
+		/>
 	{/if}
 </div>
