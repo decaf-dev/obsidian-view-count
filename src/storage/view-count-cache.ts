@@ -2,9 +2,9 @@ import { App, Notice, TFile } from "obsidian";
 import { getFilePath, parseEntries, stringifyEntries } from "./utils";
 import Logger from "js-logger";
 import _ from "lodash";
-import { ViewCountEntry } from "./types";
+import { TimesOpenedDuration, ViewCountEntry } from "./types";
 import EventManager from "src/event/event-manager";
-import { getStartOf31DaysAgoMillis, getStartOfTodayMillis } from "src/utils/time-utils";
+import { getStartOf30DaysAgoMillis, getStartOf31DaysAgoMillis, getStartOfMonthMillis, getStartOfTodayMillis, getStartOfWeekMillis } from "src/utils/time-utils";
 import { ViewCountPluginSettings } from "src/types";
 
 export default class ViewCountCache {
@@ -12,14 +12,13 @@ export default class ViewCountCache {
 	private entries: ViewCountEntry[] = [];
 	private settings: ViewCountPluginSettings;
 
+	private debounceSave = _.debounce(() => this.save(), 200);
+	debounceRefresh = _.debounce(() => this.refresh(), 200);
+
 	constructor(app: App, settings: ViewCountPluginSettings) {
 		this.app = app;
 		this.settings = settings;
 	}
-
-
-	debounceSave = _.debounce(() => this.save(), 200);
-	debounceRefresh = _.debounce(() => this.refresh(), 200);
 
 	async load() {
 		Logger.trace("ViewCountCache load");
@@ -119,17 +118,22 @@ export default class ViewCountCache {
 		}
 	}
 
-	getViewCount(file: TFile) {
-		const { viewCountType } = this.settings;
-		if (viewCountType === "unique-days-opened") {
-			return this.entries.find((entry) => entry.path === file.path)?.uniqueDaysOpened ?? 0;
-		} else {
-			return this.entries.find((entry) => entry.path === file.path)?.totalTimesOpened ?? 0;
+	/**
+	 * Gets the view count for a file.
+	 * This may be the total times opened or the unique days opened depending on the settings.
+	 * Note: This is a public method for usage with DataviewJS
+	 * @param file 
+	 * @returns 
+	 */
+	getViewCount = (file: TFile) => {
+		const entry = this.entries.find((entry) => entry.path === file.path);
+		if (!entry) {
+			return 0;
 		}
+		return this.getViewCountForEntry(entry);
 	}
 
-
-	getViewCountForEntry = (entry: ViewCountEntry) => {
+	getViewCountForEntry(entry: ViewCountEntry) {
 		const { viewCountType } = this.settings;
 		if (viewCountType === "unique-days-opened") {
 			return entry.uniqueDaysOpened;
@@ -138,14 +142,51 @@ export default class ViewCountCache {
 		}
 	}
 
-	getTimesOpenedThisMonth(entry: ViewCountEntry) {
-		const startOfMonthMillis = getStartOfTodayMillis();
-		return entry.openLogs.filter((log) => log.timestampMillis >= startOfMonthMillis).length;
+
+	/**
+	 * Gets the number of times a file has been opened for a given duration.
+	 * Note: This is a public method for usage with DataviewJS
+	 * @param file - The file to get the times opened for
+	 * @param duration - The duration to get the times opened for
+	 */
+	getNumTimesOpened(file: TFile, duration: "month" | "30-days" | "14-days" | "7-days") {
+		//console.log("getNumTimesOpened", { path: file.path, duration });
+		const entry = this.entries.find((entry) => entry.path === file.path);
+		if (!entry) {
+			return 0;
+		}
+		return this.getNumTimesOpenedForEntry(entry, duration);
 	}
 
-	getTimesOpenedLast30Days(entry: ViewCountEntry) {
-		const start30DaysAgoMillis = getStartOfTodayMillis();
-		return entry.openLogs.filter((log) => log.timestampMillis >= start30DaysAgoMillis).length;
+	getNumTimesOpenedForEntry(entry: ViewCountEntry, duration: TimesOpenedDuration) {
+		const { openLogs } = entry;
+
+		let timeMillis = 0;
+
+		switch (duration) {
+			case "month":
+				timeMillis = getStartOfMonthMillis();
+				break;
+			case "week":
+				timeMillis = getStartOfWeekMillis(false);
+				break;
+			case "week-iso":
+				timeMillis = getStartOfWeekMillis(true);
+				break;
+			case "30-days":
+				timeMillis = getStartOf30DaysAgoMillis();
+				break;
+			case "14-days":
+				timeMillis = getStartOf31DaysAgoMillis();
+				break;
+			case "7-days":
+				timeMillis = getStartOf31DaysAgoMillis();
+				break;
+			default:
+				throw new Error(`TimesOpenedDuration ${duration} is not supported`);
+		}
+
+		return openLogs.filter((log) => log.timestampMillis >= timeMillis).length;
 	}
 
 	getLastOpenTime(file: TFile) {
@@ -238,8 +279,9 @@ export default class ViewCountCache {
 	private async deleteViewCountProperty(file: TFile) {
 		Logger.trace("ViewCountCache deleteViewCountPropertyInFrontmatter");
 		const { viewCountPropertyName } = this.settings;
+
+		Logger.debug("Deleting view count property in frontmatter", { path: file.path, viewCountPropertyName });
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			console.log(frontmatter[viewCountPropertyName]);
 			frontmatter[viewCountPropertyName] = undefined;
 		});
 	}

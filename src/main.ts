@@ -201,7 +201,7 @@ export default class ViewCountPlugin extends Plugin {
 				Logger.debug("View count has not been incremented today. Incrementing view count.");
 				this.viewCountCache.incrementViewCount(file);
 			} else {
-				Logger.debug("View count was already incremented today. Returning...");
+				Logger.debug("View count was already incremented today. Returning.");
 			}
 		} else {
 			this.viewCountCache.incrementViewCount(file);

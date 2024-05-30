@@ -89,10 +89,13 @@
 			}
 		});
 
+		//TODO add selection of time period
 		let items: TrendingRenderItem[] = Array.from(entryFiles.entries()).map(
 			([entry, file]) => {
-				const timesOpened =
-					pluginStore.cache.getTimesOpenedLast30Days(entry);
+				const timesOpened = pluginStore.cache.getNumTimesOpenedForEntry(
+					entry,
+					"7-days",
+				);
 				return { file, timesOpened: timesOpened };
 			},
 		);
