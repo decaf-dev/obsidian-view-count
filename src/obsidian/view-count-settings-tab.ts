@@ -2,7 +2,6 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import ViewCountPlugin from "src/main";
 
 import { LOG_LEVEL_DEBUG, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_OFF, LOG_LEVEL_TRACE, LOG_LEVEL_WARN } from "../logger/constants";
-import "./styles.css";
 import Logger from "js-logger";
 import { stringToLogLevel } from "src/logger";
 

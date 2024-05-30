@@ -174,6 +174,20 @@ export default class ViewCountCache {
 		return this.entries;
 	}
 
+	getSortedEntries(sortDir: "asc" | "desc") {
+		let entriesCopy = [...this.entries];
+		entriesCopy.sort(
+			(a, b) => {
+				if (sortDir === "asc") {
+					return this.getViewCountForEntry(a) - this.getViewCountForEntry(b);
+				} else {
+					return this.getViewCountForEntry(b) - this.getViewCountForEntry(a);
+				}
+			}
+		);
+		return entriesCopy;
+	}
+
 	async syncFrontmatterToViewCount() {
 		Logger.trace("ViewCountCache syncFrontmatterToViewCount");
 
