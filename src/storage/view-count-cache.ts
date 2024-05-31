@@ -144,13 +144,12 @@ export default class ViewCountCache {
 
 
 	/**
-	 * Gets the number of times a file has been opened for a given duration.
+	 * Gets the trending weight (the score) for a file.
 	 * Note: This is a public method for usage with DataviewJS
-	 * @param file - The file to get the times opened for
-	 * @param duration - The duration to get the times opened for
+	 * @param file - The file to get the weight for
+	 * @param duration - The duration to use to calculate the weight
 	 */
-	getNumTimesOpened(file: TFile, duration: "month" | "30-days" | "14-days" | "7-days") {
-		//console.log("getNumTimesOpened", { path: file.path, duration });
+	getTrendingWeight(file: TFile, duration: TimesOpenedDuration) {
 		const entry = this.entries.find((entry) => entry.path === file.path);
 		if (!entry) {
 			return 0;
