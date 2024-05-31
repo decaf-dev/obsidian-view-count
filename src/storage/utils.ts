@@ -1,4 +1,4 @@
-import { App, normalizePath } from "obsidian";
+import { App, TFile, normalizePath } from "obsidian";
 import { ViewCountEntry } from "./types";
 
 export const stringifyEntries = (entries: ViewCountEntry[]) => {
@@ -28,4 +28,13 @@ export const setPropertyType = async (app: App, name: string, value: string) => 
 
 export const getPropertyType = async (app: App, name: string): Promise<string> => {
 	return (app as any).metadataTypeManager.getAssignedType(name);
+}
+
+export const shouldTrackFile = (file: TFile, excludedPaths: string[]) => {
+	return !excludedPaths.find(path => {
+		//Normalize the path so that it will match the file path
+		//This function will remove a forward slash
+		const normalized = normalizePath(path);
+		return file.path.startsWith(normalized)
+	});
 }

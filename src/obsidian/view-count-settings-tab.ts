@@ -2,7 +2,6 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import ViewCountPlugin from "src/main";
 
 import { LOG_LEVEL_DEBUG, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_OFF, LOG_LEVEL_TRACE, LOG_LEVEL_WARN } from "../logger/constants";
-import "./styles.css";
 import Logger from "js-logger";
 import { stringToLogLevel } from "src/logger";
 
@@ -15,6 +14,11 @@ class ViewCountSettingsTab extends PluginSettingTab {
 	}
 
 	display(): void {
+		const viewCountCache = this.plugin.viewCountCache;
+		if (viewCountCache === null) {
+			throw new Error("View count cache is null");
+		}
+
 		const { containerEl } = this;
 
 		containerEl.empty();
@@ -41,9 +45,9 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 
 					if (this.plugin.settings.saveViewCountToFrontmatter) {
-						await this.plugin.viewCountCache.syncFrontmatterToViewCount();
+						await viewCountCache.syncViewCountToFrontmatter();
 					}
-					await this.plugin.viewCountCache.debounceRefresh();
+					await viewCountCache.debounceRefresh();
 				}));
 
 
@@ -59,7 +63,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		const storageTypeDesc = new DocumentFragment();
 		storageTypeDesc.createDiv({
-			text: "Save the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.",
+			text: "Save the current view count to a frontmatter property in each note. This is useful if you want to query for view count using the DataView plugin.",
 		});
 		storageTypeDesc.createEl("br");
 		storageTypeDesc.createDiv({
@@ -68,7 +72,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		});
 
 		new Setting(containerEl)
-			.setName('Save view count to frontmatter')
+			.setName('Sync view count to frontmatter')
 			.setDesc(storageTypeDesc)
 			.addToggle(component => component
 				.setValue(this.plugin.settings.saveViewCountToFrontmatter)
@@ -76,7 +80,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					this.plugin.settings.saveViewCountToFrontmatter = value;
 
 					await this.plugin.saveSettings();
-					await this.plugin.viewCountCache.syncFrontmatterToViewCount();
+					await viewCountCache.syncViewCountToFrontmatter();
 				}));
 
 		const viewCountDesc = new DocumentFragment();

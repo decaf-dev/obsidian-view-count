@@ -14,3 +14,5 @@ export interface ViewCountEntry_1_2_2 {
 	viewCount: number;
 	lastViewMillis: number;
 }
+
+export type DurationFilter = "month" | "week-iso" | "week" | "30-days" | "14-days" | "7-days";
