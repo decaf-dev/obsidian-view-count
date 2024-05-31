@@ -1,7 +1,5 @@
 import { App, TFile, normalizePath } from "obsidian";
 import { ViewCountEntry } from "./types";
-import { ViewCountType } from "src/types";
-import { getStartOfTodayMillis } from "src/utils/time-utils";
 
 export const stringifyEntries = (entries: ViewCountEntry[]) => {
 	return JSON.stringify({
