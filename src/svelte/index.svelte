@@ -149,7 +149,7 @@
 			class={mostViewedClassName}
 			tabindex="0"
 			role="button"
-			aria-label="Most Viewed"
+			aria-label="Most viewed"
 			bind:this={mostViewedIconRef}
 			on:click={handleMostViewedClick}
 			on:keydown={(e) => {
