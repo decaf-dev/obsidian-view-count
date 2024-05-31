@@ -177,35 +177,12 @@ export default class ViewCountPlugin extends Plugin {
 
 
 	private async handleFileOpen(file: TFile) {
+		Logger.trace("main handleFileOpen");
 		if (this.viewCountCache === null) {
 			throw new Error("View count cache is null");
 		}
 
-		Logger.trace("handleFileOpen");
-		const { excludedPaths, viewCountType } = this.settings;
-		if (excludedPaths.find(path => {
-			//Normalize the path so that it will match the file path
-			//This function will remove a forward slash
-			const normalized = normalizePath(path);
-			return file.path.startsWith(normalized)
-		})) {
-			Logger.debug(`File path ${file.path} is included in the excludedPaths array`);
-			return false;
-		}
-
-		if (viewCountType == "unique-days-opened") {
-			Logger.debug("View count type set to 'unique-days-opened'. Checking if view count should be incremented.");
-			const lastOpenMillis = this.viewCountCache.getLastOpenTime(file);
-			const startTodayMillis = getStartOfTodayMillis();
-			if (lastOpenMillis < startTodayMillis) {
-				Logger.debug("View count has not been incremented today. Incrementing view count.");
-				this.viewCountCache.incrementViewCount(file);
-			} else {
-				Logger.debug("View count was already incremented today. Returning.");
-			}
-		} else {
-			this.viewCountCache.incrementViewCount(file);
-		}
+		this.viewCountCache.handleFileOpen(file);
 
 		if (!this.viewCountStatusBarItem) {
 			this.viewCountStatusBarItem = this.addStatusBarItem();
