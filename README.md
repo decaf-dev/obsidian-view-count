@@ -33,7 +33,7 @@ If you would like to view the view count on mobile, you will need to enable the 
 
 ### View Count Pane
 
-By default, the plugin will add a pane in the sidebar called **View Count**. You may access this pane by opening the sidebar and clicking on the eye icon.
+By default, the plugin will add a pane in the sidebar called **View Count**. You may access this pane by opening the sidebar and clicking on the eye icon. You may also open this pane by opening the command palette and running the command "Open view count pane".
 
 There are 2 different lists within this pane. Click on the eye icon to see a list of the 50 most viewed notes sorted in descending order. Click on the trending icon to see a list of the 50 notes with the highest trending weight sorted in descending order.
 
