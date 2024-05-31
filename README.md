@@ -45,13 +45,11 @@ There are 2 different lists within the view count:
 
 -   A list of the 50 notes with the highest trending weight sorted in descending order. Click on the trending icon to see this list.
 
-
 https://github.com/decaf-dev/obsidian-view-count/assets/40307803/1f97f34a-bc72-45c4-90ef-d71ab0ea6347
-
 
 ## DataView
 
-You may dynamically query notes using the [DataView plugin](https://obsidian.md/plugins?id=dataview)
+You may dynamically query view count data using the [DataView plugin](https://obsidian.md/plugins?id=dataview)
 
 ### Example 1 - Query view count using DataView
 
