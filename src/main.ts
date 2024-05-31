@@ -65,9 +65,9 @@ export default class ViewCountPlugin extends Plugin {
 
 		this.addCommand({
 			id: "open-view-count",
-			name: "Open view count pane",
+			name: "Open view count view",
 			callback: () => {
-				this.openViewCountPane(true);
+				this.openViewCountView(true);
 			}
 		});
 
@@ -76,7 +76,7 @@ export default class ViewCountPlugin extends Plugin {
 				await migratePropertyStorage(this.app, this.settings_1_2_2);
 				await viewCountCache.load();
 			}
-			this.openViewCountPane(false);
+			this.openViewCountView(false);
 		});
 	}
 
@@ -165,7 +165,7 @@ export default class ViewCountPlugin extends Plugin {
 		}));
 	}
 
-	private openViewCountPane(active: boolean) {
+	private openViewCountView(active: boolean) {
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_COUNT_ITEM_VIEW);
 		if (leaves.length === 0) {
 			this.app.workspace.getRightLeaf(false)?.setViewState({

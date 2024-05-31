@@ -33,11 +33,11 @@ There are 2 different definitions for a view count. Please see **View count type
 
 If you would like to view the view count on mobile, you will need to enable the [Sync view count to frontmatter](#settings) setting.
 
-### View count pane
+### View count view
 
-By default, the plugin will add a pane to the sidebar called **View count**. You may access this pane by opening the sidebar and clicking on the eye icon.
+By default, the plugin will add a view to the sidebar called **View count**. You may access this view by opening the sidebar and clicking on the eye icon.
 
-If the pane is not open, you may run **Open view count pane** from the command palette.
+If the view is not open, you may run **Open view count view** from the command palette.
 
 There are 2 different lists within the view count:
 
