@@ -29,7 +29,7 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 
 Once you enable the plugin, view count data will start being tracked. You can see the view count on desktop in the status bar in the bottom righthand corner.
 
-There are 2 different definitions for a view count. Please see **View count type** setting section below.
+There are 2 different definitions for a view count. Please see [View count type](#settings) setting section below.
 
 If you would like to view the view count on mobile, you will need to enable the [Sync view count to frontmatter](#settings) setting.
 
@@ -134,7 +134,7 @@ getTrendingWeight: (file: TFile, duration: DurationFilter) => number;
 
 ### Duration options
 
-The `getTrendingWeight` function accepts a duration string. Here are the following options:
+The `getTrendingWeight` function accepts a duration. Here are the following options:
 
 | Duration   | Description                           |
 | ---------- | ------------------------------------- |
