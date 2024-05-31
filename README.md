@@ -129,7 +129,7 @@ Here are the typescript definitions for these functions
 
 ```javascript
 getViewCount: (file: TFile) => number;
-getTrendingWeight: (file: TFile, duration: DurationValue) => number;
+getTrendingWeight: (file: TFile, duration: DurationFilter) => number;
 ```
 
 ### Duration options

@@ -182,7 +182,7 @@ export default class ViewCountCache {
 				timeMillis = getStartOf31DaysAgoMillis();
 				break;
 			default:
-				throw new Error(`TimesOpenedDuration ${duration} is not supported`);
+				throw new Error(`DurationFilter ${duration} is not supported`);
 		}
 
 		return openLogs.filter((log) => log.timestampMillis >= timeMillis).length;
