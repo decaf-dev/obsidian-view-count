@@ -63,7 +63,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		const storageTypeDesc = new DocumentFragment();
 		storageTypeDesc.createDiv({
-			text: "Save the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.",
+			text: "Save the current view count to a frontmatter property in each note. This is useful if you want to query for view count using the DataView plugin.",
 		});
 		storageTypeDesc.createEl("br");
 		storageTypeDesc.createDiv({
@@ -72,7 +72,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		});
 
 		new Setting(containerEl)
-			.setName('Save view count to frontmatter')
+			.setName('Sync view count to frontmatter')
 			.setDesc(storageTypeDesc)
 			.addToggle(component => component
 				.setValue(this.plugin.settings.saveViewCountToFrontmatter)
