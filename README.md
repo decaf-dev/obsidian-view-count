@@ -45,8 +45,6 @@ There are 2 different lists within the view count:
 
 -   A list of the 50 notes with the highest trending weight sorted in descending order. Click on the trending icon to see this list.
 
-![](/readme/list.png)
-
 ## DataView
 
 You may dynamically query notes using the [DataView plugin](https://obsidian.md/plugins?id=dataview)
