@@ -163,6 +163,6 @@ The view count information for all files is stored in `.obsidian/view-count.json
 
 **View count property name** - The name of the property that the view will be stored in.
 
-<mark>Please rename the existing property before updating this setting. You can use the rename option in the `All Properties` view in the sidebar to do this.</mark>
+> Please rename the existing property before updating this setting. You can use the rename option in the `All Properties` view in the sidebar to do this.
 
 **Templater delay** - The delay in milliseconds before inserting view count frontmatter. Increase this value if you're using the Templater plugin and your template is being overwritten.
