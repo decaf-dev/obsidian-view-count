@@ -40,11 +40,3 @@ export const shouldTrackFile = (file: TFile, excludedPaths: string[]) => {
 		return file.path.startsWith(normalized)
 	});
 }
-
-export const shouldIncrementViewCount = (viewCountType: ViewCountType, lastOpenTime: number) => {
-	if (viewCountType == "unique-days-opened") {
-		const startTodayMillis = getStartOfTodayMillis();
-		return lastOpenTime < startTodayMillis;
-	}
-	return true;
-}

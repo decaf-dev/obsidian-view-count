@@ -1,5 +1,5 @@
 import { App, Notice, TFile } from "obsidian";
-import { getFilePath, parseEntries, shouldIncrementViewCount, shouldTrackFile, stringifyEntries } from "./utils";
+import { getFilePath, parseEntries, shouldTrackFile, stringifyEntries } from "./utils";
 import Logger from "js-logger";
 import _ from "lodash";
 import { DurationFilter, ViewCountEntry } from "./types";
@@ -62,7 +62,7 @@ export default class ViewCountCache {
 
 	async handleFileOpen(file: TFile) {
 		Logger.trace("ViewCountCache handleFileOpen");
-		const { excludedPaths, viewCountType, templaterDelay, saveViewCountToFrontmatter } = this.settings;
+		const { excludedPaths, templaterDelay, saveViewCountToFrontmatter } = this.settings;
 		if (!shouldTrackFile(file, excludedPaths)) {
 			Logger.debug(`File ${file.path} is set to be excluded. Returning.`);
 			return;
@@ -73,23 +73,18 @@ export default class ViewCountCache {
 			await this.createEntry(file);
 		}
 
-		const lastOpenTime = this.getLastOpenTime(file);
+		await this.incrementViewCount(file.path);
 
-		if (shouldIncrementViewCount(viewCountType, lastOpenTime)) {
-			await this.incrementViewCount(file.path);
-
-			if (saveViewCountToFrontmatter) {
-				//If we're creating a new file and the templater delay is greater than 0, wait before updating the view count property in frontmatter
-				//This is to prevent the view count from overwriting the templater output
-				if (!entry && templaterDelay > 0) {
-					Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
-					await new Promise(resolve => setTimeout(resolve, templaterDelay));
-				}
-				await this.updateViewCountProperty(file);
+		if (saveViewCountToFrontmatter) {
+			//If we're creating a new file and the templater delay is greater than 0, wait before updating the view count property in frontmatter
+			//This is to prevent the view count from overwriting the templater output
+			if (!entry && templaterDelay > 0) {
+				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
+				await new Promise(resolve => setTimeout(resolve, templaterDelay));
 			}
-		} else {
-			Logger.debug("Not incrementing view count", { path: file.path });
+			await this.updateViewCountProperty(file);
 		}
+
 
 		await this.addOpenLogEntry(file.path);
 
@@ -307,7 +302,6 @@ export default class ViewCountCache {
 		const updatedEntries = this.entries.map((entry) => {
 			if (entry.path === targetPath) {
 				const lastOpenEntry = entry.openLogs.last();
-
 
 				const startTodayMillis = getStartOfTodayMillis();
 				const lastOpenMillis = lastOpenEntry?.timestampMillis ?? 0;
