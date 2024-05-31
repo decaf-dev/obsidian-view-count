@@ -12,6 +12,8 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 
 -   [Installation](#installation)
 -   [Usage](#usage)
+-   [DataView](#dataview)
+-   [API](#api)
 -   [Settings](#settings)
 
 ## Installation
@@ -31,13 +33,117 @@ There are 2 different definitions for a view count. Please see **View count type
 
 If you would like to view the view count on mobile, you will need to enable the **Sync view count to frontmatter** setting.
 
-### View Count Pane
+### View count pane
 
-By default, the plugin will add a pane in the sidebar called **View Count**. You may access this pane by opening the sidebar and clicking on the eye icon. You may also open this pane by opening the command palette and running the command "Open view count pane".
+By default, the plugin will add a pane to the sidebar called **View count**. You may access this pane by opening the sidebar and clicking on the eye icon.
 
-There are 2 different lists within this pane. Click on the eye icon to see a list of the 50 most viewed notes sorted in descending order. Click on the trending icon to see a list of the 50 notes with the highest trending weight sorted in descending order.
+If the pane is not open, you may run **Open view count pane** from the command palette.
+
+There are 2 different lists within the view count
+
+-   A list of the 50 most viewed notes in your vault sorted in descending order. Click on the eye icon to see this list.
+
+-   A list of the 50 notes with the highest trending weight sorted in descending order. Click on the trending icon to see this list.
 
 ![](/readme/list.png)
+
+## DataView
+
+To dynamically query notes you need to install and enable the [DataView plugin](https://obsidian.md/plugins?id=dataview).
+
+### Example 1 - Query view count using DataView
+
+If you have **Sync view count to frontmatter** enabled you may query the view count property from the frontmatter of each markdown note.
+
+````markdown
+```dataview
+TABLE view-count AS "View Count" SORT view-count DESC LIMIT 10
+```
+````
+
+Let's analyze this codeblock:
+
+1. Render a table using the [Dataview Query Language](https://blacksmithgu.github.io/obsidian-dataview/queries/structure/)
+2. Query the `view-count` property in each markdown note
+3. Display that property in a column called "View Count"
+4. Sort the results in descending order (highest to lowest)
+5. Limit the results to 10 notes
+
+### Example 2 - Query trending notes from the last 7 days using DataviewJS
+
+````markdown
+```dataviewjs
+const plugin = this.app.plugins.plugins["view-count"];
+const cache = plugin.viewCountCache;
+
+const DURATION = "7-days";
+
+dv.table(["Name", "Trending Weight"],
+    dv.pages().sort(p => cache.getTrendingWeight(p.file, DURATION), "desc")
+        .map(p => [p.file.name, cache.getTrendingWeight(p.file, DURATION)])
+	        .slice(0,10)
+);
+```
+````
+
+Let's analyze this codeblock:
+
+1. Render a table using the [DataviewJS](https://blacksmithgu.github.io/obsidian-dataview/api/intro/)
+2. Display 2 columns in the table: "Name" and "Trending Weight"
+3. Query all markdown files
+4. Sort the files based on the trending weight in descending order (highest to lowest)
+5. Format an array of data that includes object with just the file name and the trending weight
+6. Limit the results to 10 notes
+
+The duration can be updated with various values. See the **Duration options** section below.
+
+## API
+
+The view count plugin exposes an API that can be used to fetch the view count or trending weight for any file.
+
+To start, you need to access the view count cache.
+
+```javascript
+//Get the view count plugin
+const plugin = this.app.plugins.plugins["view-count"];
+
+//Get the view count cache
+const cache = plugin.viewCountCache;
+```
+
+Then you can use the cache to get a view count or trending weight.
+
+```javascript
+//Get the trending weight
+const weight = cache.getTrendingWeight(file, duration);
+console.log(weight);
+//output: 22
+
+//Get the view count
+const viewCount = cache.getViewCount(file);
+console.log(viewCount);
+//output: 5
+```
+
+Here are the typescript definitions for these functions
+
+```javascript
+getViewCount: (file: TFile) => number;
+getTrendingWeight: (file: TFile, duration: DurationValue) => number;
+```
+
+### Duration options
+
+The `getTrendingWeight` function accepts a duration string. Here are the following options:
+
+| Duration   | Description                           |
+| ---------- | ------------------------------------- |
+| `month`    | The start of the month e.g. January 1 |
+| `week`     | The start of the week i.e. Sunday     |
+| `week-iso` | The start of the iso week i.e. Monday |
+| `30-days`  | The last 30 days                      |
+| `14-days`  | The last 14 days                      |
+| `7-days`   | the last 7 days                       |
 
 ## Settings
 
@@ -49,7 +155,9 @@ A unique day is considered an opening of a file after 12 am your local time.
 
 **Excluded paths** - The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. `folder1,folder2/inner`
 
-**Sync view count to frontmatter** - For each markdown note, save the current view count to a property in its frontmatter. This is useful if you want to query for view count using the DataView plugin.
+**Sync view count to frontmatter** - For each markdown note, save the current view count to a property in its frontmatter.
+
+This is useful if you want to query for view count using the DataView plugin.
 
 This setting makes view count available on mobile. In the future, this setting will not be needed for mobile viewing.
 
@@ -59,4 +167,4 @@ The view count information for all files is stored in `.obsidian/view-count.json
 
 Please rename the existing property before updating this setting. You can use the rename option in the All Properties view in the sidebar to do this.
 
-**Templater Delay** - The delay in milliseconds before inserting view count frontmatter. Increase this value if you're using the Templater plugin and your template is being overwritten.
+**Templater delay** - The delay in milliseconds before inserting view count frontmatter. Increase this value if you're using the Templater plugin and your template is being overwritten.
