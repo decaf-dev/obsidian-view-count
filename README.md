@@ -19,7 +19,7 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 1. In Obsidian, open **Settings**
 2. Go to **Community plugins**
 3. Select **Browse**
-4. Search for **View Count** by DecafDev
+4. Search for **View Count** by **DecafDev**
 5. Select **Install**
 6. Then select **Enable**
 
@@ -29,11 +29,13 @@ Once you enable the plugin, view count data will start being tracked. You can se
 
 There are 2 different definitions for a view count. Please see **View count type** setting section below.
 
-If you would like to view the view count on mobile, you will need to enable the **Save view count to frontmatter** setting.
+If you would like to view the view count on mobile, you will need to enable the **Sync view count to frontmatter** setting.
 
-### Most viewed notes
+### View Count Pane
 
-To see a list of the 50 most viewed notes in descending order, open the sidebar and click on the eye icon
+By default, the plugin will add a pane in the sidebar called **View Count**. You may access this pane by opening the sidebar and clicking on the eye icon.
+
+There are 2 different lists within this pane. Click on the eye icon to see a list of the 50 most viewed notes sorted in descending order. Click on the trending icon to see a list of the 50 notes with the highest trending weight sorted in descending order.
 
 ![](/readme/list.png)
 
@@ -47,11 +49,11 @@ A unique day is considered an opening of a file after 12 am your local time.
 
 **Excluded paths** - The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. `folder1,folder2/inner`
 
-**Save view count to frontmatter** - Save the view count to a frontmatter property in each note. This is useful if you want to query for the view count using the DataView plugin.
+**Sync view count to frontmatter** - For each markdown note, save the current view count to a property in its frontmatter. This is useful if you want to query for view count using the DataView plugin.
 
 This setting makes view count available on mobile. In the future, this setting will not be needed for mobile viewing.
 
-The view count information for all files is stored in `.obsidian/view-count.json`. This setting is optional, as it duplicates data that already exists. However, it makes the view count more accessible for [DataView](https://github.com/blacksmithgu/obsidian-dataview) and other plugins because it is available in the frontmatter of the note.
+The view count information for all files is stored in `.obsidian/view-count.json`. This setting is optional, as it duplicates data that already exists. However, it makes the view count more accessible for [DataView](https://github.com/blacksmithgu/obsidian-dataview) and other plugins because it makes it available in the frontmatter of each markdown note.
 
 **View count property name** - The name of the property that the view will be stored in.
 
