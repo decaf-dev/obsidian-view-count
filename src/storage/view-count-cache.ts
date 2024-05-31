@@ -2,7 +2,7 @@ import { App, Notice, TFile } from "obsidian";
 import { getFilePath, parseEntries, stringifyEntries } from "./utils";
 import Logger from "js-logger";
 import _ from "lodash";
-import { TimesOpenedDuration, ViewCountEntry } from "./types";
+import { DurationFilter, ViewCountEntry } from "./types";
 import EventManager from "src/event/event-manager";
 import { getStartOf30DaysAgoMillis, getStartOf31DaysAgoMillis, getStartOfMonthMillis, getStartOfTodayMillis, getStartOfWeekMillis } from "src/utils/time-utils";
 import { ViewCountPluginSettings } from "src/types";
@@ -147,9 +147,9 @@ export default class ViewCountCache {
 	 * Gets the trending weight (the score) for a file.
 	 * Note: This is a public method for usage with DataviewJS
 	 * @param file - The file to get the weight for
-	 * @param duration - The duration to use to calculate the weight
+	 * @param duration - The duration used to calculate the weight
 	 */
-	getTrendingWeight(file: TFile, duration: TimesOpenedDuration) {
+	getTrendingWeight(file: TFile, duration: DurationFilter) {
 		const entry = this.entries.find((entry) => entry.path === file.path);
 		if (!entry) {
 			return 0;
@@ -157,7 +157,7 @@ export default class ViewCountCache {
 		return this.getNumTimesOpenedForEntry(entry, duration);
 	}
 
-	getNumTimesOpenedForEntry(entry: ViewCountEntry, duration: TimesOpenedDuration) {
+	getNumTimesOpenedForEntry(entry: ViewCountEntry, duration: DurationFilter) {
 		const { openLogs } = entry;
 
 		let timeMillis = 0;
