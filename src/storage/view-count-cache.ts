@@ -1,5 +1,5 @@
 import { App, Notice, TFile } from "obsidian";
-import { getFilePath, parseEntries, stringifyEntries } from "./utils";
+import { getFilePath, parseEntries, shouldIncrementViewCount, shouldTrackFile, stringifyEntries } from "./utils";
 import Logger from "js-logger";
 import _ from "lodash";
 import { DurationFilter, ViewCountEntry } from "./types";
@@ -60,62 +60,41 @@ export default class ViewCountCache {
 		}
 	}
 
-	async incrementViewCount(file: TFile) {
-		Logger.trace("ViewCountCache incrementViewCount");
-		Logger.debug("Incrementing view count for file:", { path: file.path });
+	async handleFileOpen(file: TFile) {
+		Logger.trace("ViewCountCache handleFileOpen");
+		const { excludedPaths, viewCountType, templaterDelay, saveViewCountToFrontmatter } = this.settings;
+		if (!shouldTrackFile(file, excludedPaths)) {
+			Logger.debug(`File ${file.path} is set to be excluded. Returning.`);
+			return;
+		}
 
 		const entry = this.entries.find((entry) => entry.path === file.path);
-
-		if (entry) {
-			this.entries = this.entries.map((entry) => {
-				if (entry.path === file.path) {
-					const lastOpen = entry.openLogs.last();
-
-					let shouldIncrementDaysOpened = false;
-					const startTodayMillis = getStartOfTodayMillis();
-					const lastOpenMillis = lastOpen?.timestampMillis ?? 0;
-					if (lastOpenMillis < startTodayMillis) {
-						shouldIncrementDaysOpened = true;
-					}
-
-					//Keep 31 days of logs
-					const start31DaysAgoMillis = getStartOf31DaysAgoMillis();
-					const filteredLogs = entry.openLogs.filter((log) => log.timestampMillis >= start31DaysAgoMillis);
-
-					return {
-						...entry,
-						totalTimesOpened: entry.totalTimesOpened + 1,
-						uniqueDaysOpened: shouldIncrementDaysOpened ? entry.uniqueDaysOpened + 1 : entry.uniqueDaysOpened,
-						openLogs: [...filteredLogs, { timestampMillis: Date.now() }],
-					}
-				}
-				return entry;
-			});
-		} else {
-			Logger.debug("Adding new entry");
-			this.entries = [...this.entries, {
-				path: file.path,
-				uniqueDaysOpened: 1,
-				totalTimesOpened: 1,
-				openLogs: [{ timestampMillis: Date.now() }],
-			}];
+		if (!entry) {
+			await this.createEntry(file);
 		}
+
+		const lastOpenTime = this.getLastOpenTime(file);
+
+		if (shouldIncrementViewCount(viewCountType, lastOpenTime)) {
+			await this.incrementViewCount(file.path);
+
+			if (saveViewCountToFrontmatter) {
+				//If we're creating a new file and the templater delay is greater than 0, wait before updating the view count property in frontmatter
+				//This is to prevent the view count from overwriting the templater output
+				if (!entry && templaterDelay > 0) {
+					Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
+					await new Promise(resolve => setTimeout(resolve, templaterDelay));
+				}
+				await this.updateViewCountProperty(file);
+			}
+		} else {
+			Logger.debug("Not incrementing view count", { path: file.path });
+		}
+
+		await this.addOpenLogEntry(file.path);
 
 		this.debounceSave();
 		this.debounceRefresh();
-
-
-		const { templaterDelay, saveViewCountToFrontmatter } = this.settings;
-
-		if (saveViewCountToFrontmatter) {
-			//If we're creating a new file and the templater delay is greater than 0, wait before updating the view count property in frontmatter
-			//This is to prevent the view count from overwriting the templater output
-			if (!entry && templaterDelay > 0) {
-				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
-				await new Promise(resolve => setTimeout(resolve, templaterDelay));
-			}
-			await this.updateViewCountProperty(file);
-		}
 	}
 
 	/**
@@ -257,6 +236,7 @@ export default class ViewCountCache {
 	}
 
 	private async updateViewCountProperty(file: TFile) {
+		Logger.trace("ViewCountCache updateViewCountPropertyInFrontmatter");
 		const { viewCountPropertyName, viewCountType } = this.settings;
 
 		const entry = this.entries.find((entry) => entry.path === file.path);
@@ -284,6 +264,70 @@ export default class ViewCountCache {
 			frontmatter[viewCountPropertyName] = undefined;
 		});
 	}
+
+	private async createEntry(file: TFile) {
+		Logger.trace("ViewCountCache createEntry");
+		Logger.debug("Creating new entry", { path: file.path });
+
+		const updatedEntries = [...this.entries, {
+			path: file.path,
+			uniqueDaysOpened: 0,
+			totalTimesOpened: 0,
+			openLogs: [],
+		}];
+		this.entries = updatedEntries;
+	}
+
+	private async addOpenLogEntry(targetPath: string) {
+		Logger.trace("ViewCountCache addOpenLogEntry");
+		Logger.debug("Adding to open log", { path: targetPath });
+
+		const updatedEntries = this.entries.map((entry) => {
+			if (entry.path === targetPath) {
+				//Keep 31 days of logs. This will support both 30-days and month durations
+				const start31DaysAgoMillis = getStartOf31DaysAgoMillis();
+				const filteredLogs = entry.openLogs.filter((log) => log.timestampMillis >= start31DaysAgoMillis);
+
+				const updatedLogs = [...filteredLogs, { timestampMillis: Date.now() }];
+
+				return {
+					...entry,
+					openLogs: updatedLogs
+				}
+			}
+			return entry;
+		});
+		this.entries = updatedEntries;
+	}
+
+	private async incrementViewCount(targetPath: string) {
+		Logger.trace("ViewCountCache incrementViewCount");
+		Logger.debug("Incrementing view count", { path: targetPath });
+
+		const updatedEntries = this.entries.map((entry) => {
+			if (entry.path === targetPath) {
+				const lastOpenEntry = entry.openLogs.last();
+
+
+				const startTodayMillis = getStartOfTodayMillis();
+				const lastOpenMillis = lastOpenEntry?.timestampMillis ?? 0;
+
+				let incrementDays = false;
+				if (lastOpenMillis < startTodayMillis) {
+					incrementDays = true;
+				}
+
+				return {
+					...entry,
+					totalTimesOpened: entry.totalTimesOpened + 1,
+					uniqueDaysOpened: incrementDays ? entry.uniqueDaysOpened + 1 : entry.uniqueDaysOpened,
+				}
+			}
+			return entry;
+		});
+		this.entries = updatedEntries;
+	}
+
 
 	private refresh() {
 		EventManager.getInstance().emit("refresh-item-view");

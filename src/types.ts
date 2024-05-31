@@ -1,7 +1,7 @@
 
 
 export interface ViewCountPluginSettings {
-	viewCountType: "unique-days-opened" | "total-times-opened";
+	viewCountType: ViewCountType;
 	saveViewCountToFrontmatter: boolean;
 	viewCountPropertyName: string;
 	pluginVersion: string;
@@ -9,6 +9,8 @@ export interface ViewCountPluginSettings {
 	excludedPaths: string[];
 	templaterDelay: number;
 }
+
+export type ViewCountType = "unique-days-opened" | "total-times-opened";
 
 export interface ViewCountPluginSettings_1_2_2 {
 	incrementOnceADay: boolean;
