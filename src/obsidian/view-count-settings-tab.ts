@@ -45,7 +45,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 
 					if (this.plugin.settings.saveViewCountToFrontmatter) {
-						await viewCountCache.syncFrontmatterToViewCount();
+						await viewCountCache.syncViewCountToFrontmatter();
 					}
 					await viewCountCache.debounceRefresh();
 				}));
@@ -80,7 +80,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					this.plugin.settings.saveViewCountToFrontmatter = value;
 
 					await this.plugin.saveSettings();
-					await viewCountCache.syncFrontmatterToViewCount();
+					await viewCountCache.syncViewCountToFrontmatter();
 				}));
 
 		const viewCountDesc = new DocumentFragment();

@@ -239,8 +239,8 @@ export default class ViewCountCache {
 		return entriesCopy;
 	}
 
-	async syncFrontmatterToViewCount() {
-		Logger.trace("ViewCountCache syncFrontmatterToViewCount");
+	async syncViewCountToFrontmatter() {
+		Logger.trace("ViewCountCache syncViewCountToFrontmatter");
 
 		const { saveViewCountToFrontmatter } = this.settings;
 		for (const entry of this.entries) {
