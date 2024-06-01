@@ -9,7 +9,6 @@ import { formatMessageForLogger, stringToLogLevel } from './logger';
 import _ from 'lodash';
 import { isVersionLessThan } from './utils';
 import ViewCountCache from './storage/view-count-cache';
-import { getStartOfTodayMillis } from './utils/time-utils';
 import { migrateFileStorage } from './migration/migrate-file-storage';
 import { migratePropertyStorage } from './migration/migrate-property-storage';
 
@@ -182,7 +181,7 @@ export default class ViewCountPlugin extends Plugin {
 			throw new Error("View count cache is null");
 		}
 
-		this.viewCountCache.handleFileOpen(file);
+		await this.viewCountCache.handleFileOpen(file);
 
 		if (!this.viewCountStatusBarItem) {
 			this.viewCountStatusBarItem = this.addStatusBarItem();
