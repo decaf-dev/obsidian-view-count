@@ -12,7 +12,7 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 
 -   [Installation](#installation)
 -   [Usage](#usage)
--   [DataView](#dataview)
+-   [Dataview](#dataview)
 -   [API](#api)
 -   [Settings](#settings)
 
@@ -47,11 +47,11 @@ There are 2 different lists within the view count:
 
 https://github.com/decaf-dev/obsidian-view-count/assets/40307803/1f97f34a-bc72-45c4-90ef-d71ab0ea6347
 
-## DataView
+## Dataview
 
-You may dynamically query view count data using the [DataView plugin](https://obsidian.md/plugins?id=dataview)
+You may dynamically query view count data using the [Dataview plugin](https://obsidian.md/plugins?id=dataview)
 
-### Example 1 - Query view count using DataView
+### Example 1 - Query view count using Dataview
 
 If you have **Sync view count to frontmatter** enabled you may query the view count property from the frontmatter of each markdown note.
 
