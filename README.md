@@ -174,7 +174,8 @@ The view count information for all files is stored in `.obsidian/view-count.json
 
 The name of the property that the view will be stored in.
 
-> Please rename the existing property before updating this setting. You can use the rename option in the `All Properties` view in the sidebar to do this.
+> [!WARNING]
+> Please rename the existing view count property before updating this value. This will prevent the creation of a duplicate property. You can rename the existing property using the **rename** option in the **All Properties** view in the right sidebar.
 
 ### Templater delay
 
