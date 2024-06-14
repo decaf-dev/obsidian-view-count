@@ -8,13 +8,14 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 
 ![](/readme/status-bar.png)
 
-## About
+## Table of contents
 
 -   [Installation](#installation)
 -   [Usage](#usage)
--   [DataView](#dataview)
+-   [Dataview](#dataview)
 -   [API](#api)
 -   [Settings](#settings)
+-   [License](#license)
 
 ## Installation
 
@@ -29,9 +30,9 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 
 Once you enable the plugin, view count data will start being tracked. You can see the view count on desktop in the status bar in the bottom righthand corner.
 
-There are 2 different definitions for a view count. Please see [View count type](#settings) setting section below.
+There are 2 different options for defining a view count. [View count type](#view-count-type)
 
-If you would like to view the view count on mobile, you will need to enable the [Sync view count to frontmatter](#settings) setting.
+If you would like to view the view count on mobile, you will need to enable the [Sync view count to frontmatter](#sync-view-count-to-frontmatter) setting.
 
 ### View count view
 
@@ -47,11 +48,11 @@ There are 2 different lists within the view count:
 
 https://github.com/decaf-dev/obsidian-view-count/assets/40307803/1f97f34a-bc72-45c4-90ef-d71ab0ea6347
 
-## DataView
+## Dataview
 
-You may dynamically query view count data using the [DataView plugin](https://obsidian.md/plugins?id=dataview)
+You may dynamically query view count data using the [Dataview plugin](https://obsidian.md/plugins?id=dataview)
 
-### Example 1 - Query view count using DataView
+### Example 1 - Query view count using Dataview
 
 If you have **Sync view count to frontmatter** enabled you may query the view count property from the frontmatter of each markdown note.
 
@@ -95,7 +96,7 @@ Let's analyze this codeblock:
 5. Format an array of data that includes object with just the file name and the trending weight
 6. Limit the results to 10 notes
 
-The duration can be updated with various values. See the [Duration options](#duration-options) section below.
+The duration can be updated with various values. See the [Duration](#duration) section below.
 
 ## API
 
@@ -125,16 +126,18 @@ console.log(viewCount);
 //output: 5
 ```
 
-Here are the typescript definitions for these functions
+Here are the typescript definitions for these functions:
 
 ```javascript
 getViewCount: (file: TFile) => number;
 getTrendingWeight: (file: TFile, duration: DurationFilter) => number;
 ```
 
-### Duration options
+### Duration
 
-The `getTrendingWeight` function accepts a duration. Here are the following options:
+The `getTrendingWeight` function accepts a duration.
+
+Here are the options:
 
 | Duration   | Description                           |
 | ---------- | ------------------------------------- |
@@ -147,22 +150,36 @@ The `getTrendingWeight` function accepts a duration. Here are the following opti
 
 ## Settings
 
-**View count type** - View count can defined 2 ways: the number of times a file has been opened or the number of unique days a file has been opened.
+### View count type
+
+View count can defined 2 ways: the number of times a file has been opened or the number of unique days a file has been opened.
 
 This option can be toggled whenever without affecting the functionality of the plugin. Both the values will be stored in the `.obsidian/view-count.json` file.
 
 A unique day is considered an opening of a file after 12 am your local time.
 
-**Excluded paths** - The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. `folder1,folder2/inner`
+### Excluded paths
 
-**Sync view count to frontmatter** - For each markdown note, save the current view count to a property in its frontmatter.
+The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. `folder1,folder2/inner`
+
+### Sync view count to frontmatter
+
+For each markdown note, save the current view count to a property in its frontmatter.
 
 This setting makes view count available on mobile. In the future, this toggling this setting will not be needed for mobile.
 
 The view count information for all files is stored in `.obsidian/view-count.json`. This setting is optional, as it duplicates data that already exists into the frontmatter of your markdown notes.
 
-**View count property name** - The name of the property that the view will be stored in.
+### View count property name
+
+The name of the property that the view will be stored in.
 
 > Please rename the existing property before updating this setting. You can use the rename option in the `All Properties` view in the sidebar to do this.
 
-**Templater delay** - The delay in milliseconds before inserting view count frontmatter. Increase this value if you're using the Templater plugin and your template is being overwritten.
+### Templater delay
+
+The delay in milliseconds before inserting view count frontmatter. Increase this value if you're using the Templater plugin and your template is being overwritten.
+
+## License
+
+Note Splitter is distributed under [MIT License](https://github.com/decaf-dev/obsidian-view-count/blob/master/LICENSE)
