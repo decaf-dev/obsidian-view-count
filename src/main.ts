@@ -107,8 +107,8 @@ export default class ViewCountPlugin extends Plugin {
 					data = newData as unknown as Record<string, unknown>;
 				}
 
-				if (isVersionLessThan(settingsVersion, "2.5.0")) {
-					console.log("Migrating settings from 2.4.0 to 2.5.0");
+				if (isVersionLessThan(settingsVersion, "2.4.1")) {
+					console.log("Migrating settings from 2.4.0 to 2.4.1");
 					const typedData = (data as unknown) as ViewCountPluginSettings_2_4_0;
 					const newData: ViewCountPluginSettings = {
 						...typedData,
