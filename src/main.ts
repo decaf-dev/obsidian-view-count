@@ -116,6 +116,8 @@ export default class ViewCountPlugin extends Plugin {
 						currentView: TView.VIEWS,
 						itemCount: 20
 					}
+					delete (newData as any).durationFilter;
+					delete (newData as any).listSize;
 					data = newData as unknown as Record<string, unknown>;
 				}
 			}
