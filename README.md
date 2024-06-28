@@ -4,18 +4,17 @@
 
 View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobile. It allows you to track the view count for each file in your vault.
 
-![](/readme/property.png)
-
-![](/readme/status-bar.png)
-
 ## Table of contents
 
+-   [Demo](#demo)
 -   [Installation](#installation)
 -   [Usage](#usage)
 -   [Dataview](#dataview)
 -   [API](#api)
 -   [Settings](#settings)
 -   [License](#license)
+
+## Demo
 
 ## Installation
 
