@@ -1,6 +1,6 @@
 import { Plugin, TFile } from 'obsidian';
 import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
-import { ViewCountPluginSettings, ViewCountPluginSettings_1_2_1, ViewCountPluginSettings_1_2_2 } from './types';
+import { ViewCountPluginSettings, ViewCountPluginSettings_1_2_1, ViewCountPluginSettings_1_2_2, ViewCountPluginSettings_2_3_1 } from './types';
 import ViewCountItemView from './obsidian/view-count-item-view';
 import { DEFAULT_SETTINGS, VIEW_COUNT_ITEM_VIEW } from './constants';
 import Logger from 'js-logger';
@@ -10,6 +10,8 @@ import { isVersionLessThan } from './utils';
 import ViewCountCache from './storage/view-count-cache';
 import { migrateFileStorage } from './migration/migrate-file-storage';
 import { migratePropertyStorage } from './migration/migrate-property-storage';
+import { DurationFilter } from './storage/types';
+import { TView } from './svelte/types';
 
 export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings = DEFAULT_SETTINGS;
@@ -28,7 +30,7 @@ export default class ViewCountPlugin extends Plugin {
 
 		this.registerView(
 			VIEW_COUNT_ITEM_VIEW,
-			(leaf) => new ViewCountItemView(leaf, this.app, viewCountCache),
+			(leaf) => new ViewCountItemView(leaf, this),
 		);
 
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
@@ -80,7 +82,7 @@ export default class ViewCountPlugin extends Plugin {
 					console.log("Migrating settings from 1.2.2 to 2.0.0");
 					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_2;
 
-					const newData: ViewCountPluginSettings = {
+					const newData: ViewCountPluginSettings_2_3_1 = {
 						...typedData,
 						saveViewCountToFrontmatter: typedData.storageType === "property" ? true : false,
 						viewCountType: typedData.incrementOnceADay ? "unique-days-opened" : "total-times-opened",
@@ -89,6 +91,18 @@ export default class ViewCountPlugin extends Plugin {
 
 					this.settings_1_2_2 = structuredClone(typedData);
 					await migrateFileStorage(this.app, typedData);
+				}
+
+				if (isVersionLessThan(settingsVersion, "2.4.0")) {
+					console.log("Migrating settings from 2.3.1 to 2.4.0");
+					const typedData = (data as unknown) as ViewCountPluginSettings_2_3_1;
+					const newData: ViewCountPluginSettings = {
+						...typedData,
+						durationFilter: DurationFilter.DAYS_3,
+						currentView: TView.MOST_VIEWED,
+						listSize: 20
+					}
+					data = newData as unknown as Record<string, unknown>;
 				}
 			}
 		}

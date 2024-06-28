@@ -141,9 +141,11 @@ Here are the options:
 | `month`    | The start of the month e.g. January 1 |
 | `week`     | The start of the week i.e. Sunday     |
 | `week-iso` | The start of the iso week i.e. Monday |
+| `today`    | The start of the current day          |
 | `30-days`  | The last 30 days                      |
 | `14-days`  | The last 14 days                      |
-| `7-days`   | the last 7 days                       |
+| `7-days`   | The last 7 days                       |
+| `3-days`   | The last 3 days                       |
 
 ## Settings
 
