@@ -15,7 +15,7 @@ export interface ViewCountEntry_1_2_2 {
 	lastViewMillis: number;
 }
 
-export type RenderSize = 10 | 15 | 20 | 25 | 50 | 100;
+export type ListSize = 10 | 15 | 20 | 25 | 50 | 100;
 
 export enum DurationFilter {
 	MONTH = "month",

@@ -5,7 +5,7 @@
 	import EventManager from "src/event/event-manager";
 	import {
 		DurationFilter,
-		RenderSize,
+		ListSize,
 		ViewCountEntry,
 	} from "src/storage/types";
 	import MostViewedView from "./components/most-viewed-view.svelte";
@@ -18,7 +18,7 @@
 	let mostViewedRenderItems: MostViewedRenderItem[] = [];
 	let trendingRenderItems: TrendingRenderItem[] = [];
 	let duration: DurationFilter = DurationFilter.WEEK_ISO;
-	let renderSize: RenderSize = 20;
+	let listSize: ListSize = 20;
 
 	let pluginStore: ViewCountPluginStore;
 
@@ -63,7 +63,7 @@
 			const viewCount = pluginStore.cache.getViewCountForEntry(entry);
 			return { file, viewCount };
 		});
-		items = items.slice(0, renderSize);
+		items = items.slice(0, listSize);
 		return items;
 	}
 
@@ -90,7 +90,7 @@
 		);
 		items.sort((a, b) => b.timesOpened - a.timesOpened);
 		items = items.filter((item) => item.timesOpened > 0);
-		items = items.slice(0, renderSize);
+		items = items.slice(0, listSize);
 		return items;
 	}
 
@@ -102,7 +102,7 @@
 		currentView = TView.TRENDING;
 	}
 
-	function handleItemsToShowClick(e: CustomEvent) {
+	function handleListSizeClick(e: CustomEvent) {
 		const { nativeEvent } = e.detail;
 
 		const menu = new Menu();
@@ -110,33 +110,33 @@
 
 		menu.addItem((item) => {
 			item.setTitle("10");
-			item.setChecked(renderSize === 10);
-			item.onClick(() => (renderSize = 10));
+			item.setChecked(listSize === 10);
+			item.onClick(() => (listSize = 10));
 		});
 		menu.addItem((item) => {
 			item.setTitle("15");
-			item.setChecked(renderSize === 15);
-			item.onClick(() => (renderSize = 15));
+			item.setChecked(listSize === 15);
+			item.onClick(() => (listSize = 15));
 		});
 		menu.addItem((item) => {
 			item.setTitle("20");
-			item.setChecked(renderSize === 20);
-			item.onClick(() => (renderSize = 20));
+			item.setChecked(listSize === 20);
+			item.onClick(() => (listSize = 20));
 		});
 		menu.addItem((item) => {
 			item.setTitle("25");
-			item.setChecked(renderSize === 25);
-			item.onClick(() => (renderSize = 25));
+			item.setChecked(listSize === 25);
+			item.onClick(() => (listSize = 25));
 		});
 		menu.addItem((item) => {
 			item.setTitle("50");
-			item.setChecked(renderSize === 50);
-			item.onClick(() => (renderSize = 50));
+			item.setChecked(listSize === 50);
+			item.onClick(() => (listSize = 50));
 		});
 		menu.addItem((item) => {
 			item.setTitle("100");
-			item.setChecked(renderSize === 100);
-			item.onClick(() => (renderSize = 100));
+			item.setChecked(listSize === 100);
+			item.onClick(() => (listSize = 100));
 		});
 		menu.showAtMouseEvent(nativeEvent);
 	}
@@ -194,11 +194,11 @@
 		});
 	}
 
-	$: if (duration || renderSize) {
+	$: if (duration || listSize) {
 		trendingRenderItems = updateTrendingItems();
 	}
 
-	$: if (renderSize) {
+	$: if (listSize) {
 		mostViewedRenderItems = updateMostViewedItems();
 	}
 </script>
@@ -218,9 +218,9 @@
 			on:click={handleTrendingClick}
 		/>
 		<IconButton
-			ariaLabel="Items to show"
+			ariaLabel="List size"
 			iconId="sigma"
-			on:click={handleItemsToShowClick}
+			on:click={handleListSizeClick}
 		/>
 		<IconButton
 			ariaLabel="Duration filter"
