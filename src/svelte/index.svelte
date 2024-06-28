@@ -17,7 +17,7 @@
 	let currentView: TView = TView.MOST_VIEWED;
 	let mostViewedRenderItems: MostViewedRenderItem[] = [];
 	let trendingRenderItems: TrendingRenderItem[] = [];
-	let duration: DurationFilter = DurationFilter.WEEK_ISO;
+	let duration: DurationFilter = DurationFilter.DAYS_3;
 	let listSize: ListSize = 20;
 
 	let pluginStore: ViewCountPluginStore;
