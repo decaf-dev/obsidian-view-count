@@ -23,7 +23,6 @@ export interface ViewCountPluginSettings_1_2_2 {
 	templaterDelay: number;
 }
 
-
 export interface ViewCountPluginSettings_1_2_1 {
 	incrementOnceADay: boolean;
 	storageType: "property" | "file";

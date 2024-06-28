@@ -4,7 +4,7 @@ import Logger from "js-logger";
 import _ from "lodash";
 import { DurationFilter, ViewCountEntry } from "./types";
 import EventManager from "src/event/event-manager";
-import { getStartOf30DaysAgoMillis, getStartOf31DaysAgoMillis, getStartOfMonthMillis, getStartOfTodayMillis, getStartOfWeekMillis } from "src/utils/time-utils";
+import { getStartOf14DaysAgoMillis, getStartOf30DaysAgoMillis, getStartOf31DaysAgoMillis, getStartOf7DaysAgoMillis, getStartOfMonthMillis, getStartOfTodayMillis, getStartOfWeekMillis } from "src/utils/time-utils";
 import { ViewCountPluginSettings } from "src/types";
 
 export default class ViewCountCache {
@@ -150,10 +150,10 @@ export default class ViewCountCache {
 				timeMillis = getStartOf30DaysAgoMillis();
 				break;
 			case "14-days":
-				timeMillis = getStartOf31DaysAgoMillis();
+				timeMillis = getStartOf14DaysAgoMillis();
 				break;
 			case "7-days":
-				timeMillis = getStartOf31DaysAgoMillis();
+				timeMillis = getStartOf7DaysAgoMillis();
 				break;
 			default:
 				throw new Error(`DurationFilter ${duration} is not supported`);

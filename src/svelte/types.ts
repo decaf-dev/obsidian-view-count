@@ -9,3 +9,8 @@ export interface TrendingRenderItem {
 	file: TFile;
 	timesOpened: number;
 }
+
+export enum TView {
+	MOST_VIEWED = "most-viewed",
+	TRENDING = "trending"
+}
