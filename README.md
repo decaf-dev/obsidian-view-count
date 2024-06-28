@@ -6,7 +6,7 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 
 ## Table of contents
 
--   [Demo](#demo)
+-   [Videos](#videos)
 -   [Installation](#installation)
 -   [Usage](#usage)
 -   [Dataview](#dataview)
@@ -14,7 +14,29 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 -   [Settings](#settings)
 -   [License](#license)
 
-## Demo
+## Videos
+
+Basic plugin usage
+
+<video src="https://github.com/decaf-dev/obsidian-view-count/assets/40307803/e51fec6b-2549-4c3a-bff3-65f6d3009671" controls="controls" style="max-width: 100%;">
+  Your browser does not support the video tag.
+</video>
+
+<br/>
+
+The [sync view count to frontmatter](#sync-view-count-to-frontmatter) setting
+
+<video src="https://github.com/decaf-dev/obsidian-view-count/assets/40307803/2e245b7d-a4f6-4e39-b115-6f0de71e7cba" controls="controls" style="max-width: 100%;">
+  Your browser does not support the video tag.
+</video>
+
+<br/>
+
+The [view count type](#view-count-type) setting
+
+<video src="https://github.com/decaf-dev/obsidian-view-count/assets/40307803/ba3a4317-5307-40db-8bbe-75d686ae0e4f" controls="controls" style="max-width: 100%;">
+  Your browser does not support the video tag.
+</video>
 
 ## Installation
 
@@ -29,7 +51,7 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 
 Once you enable the plugin, view count data will start being tracked. You can see the view count on desktop in the status bar in the bottom righthand corner.
 
-There are 2 different options for defining a view count. [View count type](#view-count-type)
+There are 2 types of view count. [View count type](#view-count-type)
 
 If you would like to view the view count on mobile, you will need to enable the [Sync view count to frontmatter](#sync-view-count-to-frontmatter) setting.
 
@@ -41,9 +63,9 @@ If the view is not open, you may run **Open view count view** from the command p
 
 There are 2 different lists within the view count:
 
--   A list of the 50 most viewed notes in your vault sorted in descending order. Click on the eye icon to see this list.
+-   A list of the most viewed notes in your vault sorted in descending order. Click on the eye icon to see this list.
 
--   A list of the 50 notes with the highest trending weight sorted in descending order. Click on the trending icon to see this list.
+-   A list of the notes with the highest trending weight sorted in descending order. Click on the trending icon to see this list.
 
 ## Dataview
 
@@ -138,14 +160,14 @@ Here are the options:
 
 | Duration   | Description                           |
 | ---------- | ------------------------------------- |
-| `month`    | The start of the month e.g. January 1 |
+| `3-days`   | The last 3 days                       |
+| `7-days`   | The last 7 days                       |
+| `14-days`  | The last 14 days                      |
+| `30-days`  | The last 30 days                      |
+| `today`    | The start of the current day          |
 | `week`     | The start of the week i.e. Sunday     |
 | `week-iso` | The start of the iso week i.e. Monday |
-| `today`    | The start of the current day          |
-| `30-days`  | The last 30 days                      |
-| `14-days`  | The last 14 days                      |
-| `7-days`   | The last 7 days                       |
-| `3-days`   | The last 3 days                       |
+| `month`    | The start of the month e.g. January 1 |
 
 ## Settings
 
@@ -182,4 +204,4 @@ The delay in milliseconds before inserting view count frontmatter. Increase this
 
 ## License
 
-Note Splitter is distributed under [MIT License](https://github.com/decaf-dev/obsidian-view-count/blob/master/LICENSE)
+View Count is distributed under [MIT License](https://github.com/decaf-dev/obsidian-view-count/blob/master/LICENSE)
