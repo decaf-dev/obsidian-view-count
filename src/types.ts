@@ -3,7 +3,7 @@ import { TView } from "./svelte/types";
 
 
 export interface ViewCountPluginSettings {
-	viewCountType: ViewCountType;
+	viewCountType: TViewCount;
 	saveViewCountToFrontmatter: boolean;
 	viewCountPropertyName: string;
 	pluginVersion: string;
@@ -16,7 +16,7 @@ export interface ViewCountPluginSettings {
 }
 
 export interface ViewCountPluginSettings_2_3_1 {
-	viewCountType: ViewCountType;
+	viewCountType: TViewCount;
 	saveViewCountToFrontmatter: boolean;
 	viewCountPropertyName: string;
 	pluginVersion: string;
@@ -25,7 +25,7 @@ export interface ViewCountPluginSettings_2_3_1 {
 	templaterDelay: number;
 }
 
-export type ViewCountType = "unique-days-opened" | "total-times-opened";
+export type TViewCount = "unique-days-opened" | "total-times-opened";
 
 export interface ViewCountPluginSettings_1_2_2 {
 	incrementOnceADay: boolean;
