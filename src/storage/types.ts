@@ -21,7 +21,9 @@ export enum DurationFilter {
 	MONTH = "month",
 	WEEK_ISO = "week-iso",
 	WEEK = "week",
+	TODAY = "today",
 	DAYS_30 = "30-days",
 	DAYS_14 = "14-days",
-	DAYS_7 = "7-days"
+	DAYS_7 = "7-days",
+	DAYS_3 = "3-days"
 }

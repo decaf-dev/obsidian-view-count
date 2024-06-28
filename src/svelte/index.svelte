@@ -146,6 +146,11 @@
 		const menu = new Menu();
 		menu.setUseNativeMenu(true);
 		menu.addItem((item) => {
+			item.setTitle("3 days");
+			item.setChecked(duration === DurationFilter.DAYS_3);
+			item.onClick(() => (duration = DurationFilter.DAYS_3));
+		});
+		menu.addItem((item) => {
 			item.setTitle("7 days");
 			item.setChecked(duration === DurationFilter.DAYS_7);
 			item.onClick(() => (duration = DurationFilter.DAYS_7));
@@ -162,17 +167,22 @@
 		});
 		menu.addSeparator();
 		menu.addItem((item) => {
-			item.setTitle("Week");
+			item.setTitle("Today");
+			item.setChecked(duration === DurationFilter.TODAY);
+			item.onClick(() => (duration = DurationFilter.TODAY));
+		});
+		menu.addItem((item) => {
+			item.setTitle("This week");
 			item.setChecked(duration === DurationFilter.WEEK);
 			item.onClick(() => (duration = DurationFilter.WEEK));
 		});
 		menu.addItem((item) => {
-			item.setTitle("Week Iso");
+			item.setTitle("This week iso");
 			item.setChecked(duration === DurationFilter.WEEK_ISO);
 			item.onClick(() => (duration = DurationFilter.WEEK_ISO));
 		});
 		menu.addItem((item) => {
-			item.setTitle("Month");
+			item.setTitle("This month");
 			item.setChecked(duration === DurationFilter.MONTH);
 			item.onClick(() => (duration = DurationFilter.MONTH));
 		});

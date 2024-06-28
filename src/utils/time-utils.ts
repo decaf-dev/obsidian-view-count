@@ -37,6 +37,7 @@ export const getStartOf31DaysAgoMillis = () => {
 	return getStartOfDaysMillis(31);
 }
 
+
 export const getStartOf30DaysAgoMillis = () => {
 	return getStartOfDaysMillis(30);
 }
@@ -47,6 +48,10 @@ export const getStartOf14DaysAgoMillis = () => {
 
 export const getStartOf7DaysAgoMillis = () => {
 	return getStartOfDaysMillis(7);
+}
+
+export const getStartOf3DaysAgoMillis = () => {
+	return getStartOfDaysMillis(3);
 }
 
 const getStartOfDaysMillis = (daysAgo: number) => {

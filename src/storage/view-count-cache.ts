@@ -4,7 +4,7 @@ import Logger from "js-logger";
 import _ from "lodash";
 import { DurationFilter, ViewCountEntry } from "./types";
 import EventManager from "src/event/event-manager";
-import { getStartOf14DaysAgoMillis, getStartOf30DaysAgoMillis, getStartOf31DaysAgoMillis, getStartOf7DaysAgoMillis, getStartOfMonthMillis, getStartOfTodayMillis, getStartOfWeekMillis } from "src/utils/time-utils";
+import { getStartOf14DaysAgoMillis, getStartOf30DaysAgoMillis, getStartOf31DaysAgoMillis, getStartOf3DaysAgoMillis, getStartOf7DaysAgoMillis, getStartOfMonthMillis, getStartOfTodayMillis, getStartOfWeekMillis } from "src/utils/time-utils";
 import { ViewCountPluginSettings } from "src/types";
 
 export default class ViewCountCache {
@@ -140,23 +140,29 @@ export default class ViewCountCache {
 		let timeMillis = 0;
 
 		switch (duration) {
-			case "month":
+			case DurationFilter.MONTH:
 				timeMillis = getStartOfMonthMillis();
 				break;
-			case "week":
+			case DurationFilter.WEEK:
 				timeMillis = getStartOfWeekMillis(false);
 				break;
-			case "week-iso":
+			case DurationFilter.WEEK_ISO:
 				timeMillis = getStartOfWeekMillis(true);
 				break;
-			case "30-days":
+			case DurationFilter.TODAY:
+				timeMillis = getStartOfTodayMillis();
+				break;
+			case DurationFilter.DAYS_30:
 				timeMillis = getStartOf30DaysAgoMillis();
 				break;
-			case "14-days":
+			case DurationFilter.DAYS_14:
 				timeMillis = getStartOf14DaysAgoMillis();
 				break;
-			case "7-days":
+			case DurationFilter.DAYS_7:
 				timeMillis = getStartOf7DaysAgoMillis();
+				break;
+			case DurationFilter.DAYS_3:
+				timeMillis = getStartOf3DaysAgoMillis();
 				break;
 			default:
 				throw new Error(`DurationFilter ${duration} is not supported`);
