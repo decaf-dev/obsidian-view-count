@@ -30,7 +30,7 @@ export default class ViewCountPlugin extends Plugin {
 
 		this.registerView(
 			VIEW_COUNT_ITEM_VIEW,
-			(leaf) => new ViewCountItemView(leaf, this.app, viewCountCache),
+			(leaf) => new ViewCountItemView(leaf, this),
 		);
 
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));

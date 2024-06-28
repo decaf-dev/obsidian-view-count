@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Menu, TFile } from "obsidian";
 	import { onMount } from "svelte";
-	import store, { ViewCountPluginStore } from "./store";
+	import store from "./store";
 	import EventManager from "src/event/event-manager";
 	import {
 		DurationFilter,
@@ -12,18 +12,24 @@
 	import TrendingView from "./components/trending-view.svelte";
 	import { MostViewedRenderItem, TrendingRenderItem, TView } from "./types";
 	import IconButton from "./components/icon-button.svelte";
+	import ViewCountPlugin from "src/main";
 	import "./styles.css";
 
 	let currentView: TView = TView.MOST_VIEWED;
 	let mostViewedRenderItems: MostViewedRenderItem[] = [];
 	let trendingRenderItems: TrendingRenderItem[] = [];
-	let duration: DurationFilter = DurationFilter.DAYS_3;
-	let listSize: ListSize = 20;
 
-	let pluginStore: ViewCountPluginStore;
+	let duration: DurationFilter;
+	let listSize: ListSize;
+	let plugin: ViewCountPlugin;
 
-	store.pluginStore.subscribe((store) => {
-		pluginStore = store;
+	store.plugin.subscribe((p) => {
+		plugin = p;
+
+		listSize = plugin.settings.listSize;
+		duration = plugin.settings.durationFilter;
+		currentView = plugin.settings.currentView;
+
 		updateMostViewedItems();
 		updateTrendingItems();
 	});
@@ -46,11 +52,11 @@
 
 	function updateMostViewedItems() {
 		const sortedEntries =
-			pluginStore.cache.getEntriesSortedByViewCount("desc");
+			plugin.viewCountCache!.getEntriesSortedByViewCount("desc");
 
 		const entryFiles: Map<ViewCountEntry, TFile> = new Map();
 		sortedEntries.forEach((entry) => {
-			const file = pluginStore.app.vault.getFileByPath(entry.path);
+			const file = plugin.app.vault.getFileByPath(entry.path);
 			if (file !== null) {
 				entryFiles.set(entry, file);
 			}
@@ -59,7 +65,8 @@
 		let items: MostViewedRenderItem[] = Array.from(
 			entryFiles.entries(),
 		).map(([entry, file]) => {
-			const viewCount = pluginStore.cache.getViewCountForEntry(entry);
+			const viewCount =
+				plugin.viewCountCache!.getViewCountForEntry(entry);
 			return { file, viewCount };
 		});
 		items = items.slice(0, listSize);
@@ -68,11 +75,11 @@
 
 	function updateTrendingItems() {
 		const sortedEntries =
-			pluginStore.cache.getEntriesSortedByViewCount("desc");
+			plugin.viewCountCache!.getEntriesSortedByViewCount("desc");
 
 		const entryFiles: Map<ViewCountEntry, TFile> = new Map();
 		sortedEntries.forEach((entry) => {
-			const file = pluginStore.app.vault.getFileByPath(entry.path);
+			const file = plugin.app.vault.getFileByPath(entry.path);
 			if (file !== null) {
 				entryFiles.set(entry, file);
 			}
@@ -80,10 +87,11 @@
 
 		let items: TrendingRenderItem[] = Array.from(entryFiles.entries()).map(
 			([entry, file]) => {
-				const timesOpened = pluginStore.cache.getNumTimesOpenedForEntry(
-					entry,
-					duration,
-				);
+				const timesOpened =
+					plugin.viewCountCache!.getNumTimesOpenedForEntry(
+						entry,
+						duration!,
+					);
 				return { file, timesOpened: timesOpened };
 			},
 		);
@@ -99,6 +107,13 @@
 
 	function handleTrendingClick() {
 		currentView = TView.TRENDING;
+	}
+
+	async function saveSettings() {
+		plugin.settings.listSize = listSize;
+		plugin.settings.durationFilter = duration;
+		plugin.settings.currentView = currentView;
+		await plugin.saveSettings();
 	}
 
 	function handleListSizeClick(e: CustomEvent) {
@@ -191,10 +206,10 @@
 
 	function handleItemClick(e: CustomEvent) {
 		const { file } = e.detail;
-		const viewType = (
-			pluginStore.app as any
-		).viewRegistry.getTypeByExtension(file.extension);
-		pluginStore.app.workspace.getLeaf(false)?.setViewState({
+		const viewType = (plugin.app as any).viewRegistry.getTypeByExtension(
+			file.extension,
+		);
+		plugin.app.workspace.getLeaf(false)?.setViewState({
 			type: viewType,
 			active: true,
 			state: {
@@ -210,6 +225,8 @@
 	$: if (listSize) {
 		updateMostViewedItems();
 	}
+
+	$: duration, listSize, currentView, saveSettings();
 </script>
 
 <div class="nav-header">

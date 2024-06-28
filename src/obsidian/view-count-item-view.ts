@@ -1,18 +1,16 @@
-import { App, ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, WorkspaceLeaf } from "obsidian";
 import { VIEW_COUNT_ITEM_VIEW } from "src/constants";
-import ViewCountCache from "src/storage/view-count-cache";
+import ViewCountPlugin from "src/main";
 import ItemViewApp from "src/svelte/index.svelte";
 import store from "src/svelte/store";
 
 export default class ViewCountItemView extends ItemView {
-	app: App;
-	cache: ViewCountCache;
+	plugin: ViewCountPlugin;
 	component: ItemViewApp | null;
 
-	constructor(leaf: WorkspaceLeaf, app: App, cache: ViewCountCache) {
+	constructor(leaf: WorkspaceLeaf, plugin: ViewCountPlugin) {
 		super(leaf);
-		this.app = app;
-		this.cache = cache;
+		this.plugin = plugin;
 		this.component = null;
 	}
 
@@ -33,11 +31,7 @@ export default class ViewCountItemView extends ItemView {
 		const { containerEl } = this;
 		containerEl.empty();
 
-
-		store.pluginStore.set({
-			app: this.app,
-			cache: this.cache,
-		});
+		store.plugin.set(this.plugin);
 
 		this.component = new ItemViewApp({
 			target: containerEl,
