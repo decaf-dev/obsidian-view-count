@@ -3,54 +3,48 @@
 	import { onMount } from "svelte";
 	import store from "./store";
 	import EventManager from "src/event/event-manager";
-	import {
-		DurationFilter,
-		ListSize,
-		ViewCountEntry,
-	} from "src/storage/types";
-	import MostViewedView from "./components/most-viewed-view.svelte";
-	import TrendingView from "./components/trending-view.svelte";
-	import { MostViewedRenderItem, TrendingRenderItem, TView } from "./types";
+	import { ViewCountEntry } from "src/storage/types";
+	import ViewsView from "./components/views-view.svelte";
+	import TrendsView from "./components/trends-view.svelte";
+	import { MostViewedRenderItem, TrendingRenderItem } from "./types";
 	import IconButton from "./components/icon-button.svelte";
 	import ViewCountPlugin from "src/main";
 	import "./styles.css";
+	import { TimePeriod, ItemCount, TView } from "src/types";
 
-	let currentView: TView = TView.MOST_VIEWED;
-	let mostViewedRenderItems: MostViewedRenderItem[] = [];
-	let trendingRenderItems: TrendingRenderItem[] = [];
+	let currentView: TView = TView.VIEWS;
+	let viewRenderItems: MostViewedRenderItem[] = [];
+	let trendRenderItems: TrendingRenderItem[] = [];
 
-	let duration: DurationFilter;
-	let listSize: ListSize;
+	let timePeriod: TimePeriod;
+	let itemCount: ItemCount;
 	let plugin: ViewCountPlugin;
 
 	store.plugin.subscribe((p) => {
 		plugin = p;
 
-		listSize = plugin.settings.listSize;
-		duration = plugin.settings.durationFilter;
+		itemCount = plugin.settings.itemCount;
+		timePeriod = plugin.settings.timePeriod;
 		currentView = plugin.settings.currentView;
 
-		updateMostViewedItems();
-		updateTrendingItems();
+		updateViewItems();
+		updateTrendItems();
 	});
 
 	onMount(() => {
 		//TODO optimize event. Don't update all items?
-		function handleRefreshEvent() {
-			updateMostViewedItems();
-			updateTrendingItems();
+		function handleRefresh() {
+			updateViewItems();
+			updateTrendItems();
 		}
 
-		EventManager.getInstance().on("refresh-item-view", handleRefreshEvent);
+		EventManager.getInstance().on("refresh-item-view", handleRefresh);
 		return () => {
-			EventManager.getInstance().off(
-				"refresh-item-view",
-				handleRefreshEvent,
-			);
+			EventManager.getInstance().off("refresh-item-view", handleRefresh);
 		};
 	});
 
-	function updateMostViewedItems() {
+	function updateViewItems() {
 		const sortedEntries =
 			plugin.viewCountCache!.getEntriesSortedByViewCount("desc");
 
@@ -69,11 +63,11 @@
 				plugin.viewCountCache!.getViewCountForEntry(entry);
 			return { file, viewCount };
 		});
-		items = items.slice(0, listSize);
-		mostViewedRenderItems = items;
+		items = items.slice(0, itemCount);
+		viewRenderItems = items;
 	}
 
-	function updateTrendingItems() {
+	function updateTrendItems() {
 		const sortedEntries =
 			plugin.viewCountCache!.getEntriesSortedByViewCount("desc");
 
@@ -90,33 +84,33 @@
 				const timesOpened =
 					plugin.viewCountCache!.getNumTimesOpenedForEntry(
 						entry,
-						duration!,
+						timePeriod!,
 					);
 				return { file, timesOpened: timesOpened };
 			},
 		);
 		items.sort((a, b) => b.timesOpened - a.timesOpened);
 		items = items.filter((item) => item.timesOpened > 0);
-		items = items.slice(0, listSize);
-		trendingRenderItems = items;
+		items = items.slice(0, itemCount);
+		trendRenderItems = items;
 	}
 
-	function handleMostViewedClick() {
-		currentView = TView.MOST_VIEWED;
+	function handleViewsClick() {
+		currentView = TView.VIEWS;
 	}
 
-	function handleTrendingClick() {
-		currentView = TView.TRENDING;
+	function handleTrendsClick() {
+		currentView = TView.TRENDS;
 	}
 
 	async function saveSettings() {
-		plugin.settings.listSize = listSize;
-		plugin.settings.durationFilter = duration;
+		plugin.settings.itemCount = itemCount;
+		plugin.settings.timePeriod = timePeriod;
 		plugin.settings.currentView = currentView;
 		await plugin.saveSettings();
 	}
 
-	function handleListSizeClick(e: CustomEvent) {
+	function handleItemCountClick(e: CustomEvent) {
 		const { nativeEvent } = e.detail;
 
 		const menu = new Menu();
@@ -124,82 +118,82 @@
 
 		menu.addItem((item) => {
 			item.setTitle("10");
-			item.setChecked(listSize === 10);
-			item.onClick(() => (listSize = 10));
+			item.setChecked(itemCount === 10);
+			item.onClick(() => (itemCount = 10));
 		});
 		menu.addItem((item) => {
 			item.setTitle("15");
-			item.setChecked(listSize === 15);
-			item.onClick(() => (listSize = 15));
+			item.setChecked(itemCount === 15);
+			item.onClick(() => (itemCount = 15));
 		});
 		menu.addItem((item) => {
 			item.setTitle("20");
-			item.setChecked(listSize === 20);
-			item.onClick(() => (listSize = 20));
+			item.setChecked(itemCount === 20);
+			item.onClick(() => (itemCount = 20));
 		});
 		menu.addItem((item) => {
 			item.setTitle("25");
-			item.setChecked(listSize === 25);
-			item.onClick(() => (listSize = 25));
+			item.setChecked(itemCount === 25);
+			item.onClick(() => (itemCount = 25));
 		});
 		menu.addItem((item) => {
 			item.setTitle("50");
-			item.setChecked(listSize === 50);
-			item.onClick(() => (listSize = 50));
+			item.setChecked(itemCount === 50);
+			item.onClick(() => (itemCount = 50));
 		});
 		menu.addItem((item) => {
 			item.setTitle("100");
-			item.setChecked(listSize === 100);
-			item.onClick(() => (listSize = 100));
+			item.setChecked(itemCount === 100);
+			item.onClick(() => (itemCount = 100));
 		});
 		menu.showAtMouseEvent(nativeEvent);
 	}
 
-	function handleDurationClick(e: CustomEvent) {
+	function handleTimePeriodClick(e: CustomEvent) {
 		const { nativeEvent } = e.detail;
 
 		const menu = new Menu();
 		menu.setUseNativeMenu(true);
 		menu.addItem((item) => {
 			item.setTitle("3 days");
-			item.setChecked(duration === DurationFilter.DAYS_3);
-			item.onClick(() => (duration = DurationFilter.DAYS_3));
+			item.setChecked(timePeriod === TimePeriod.DAYS_3);
+			item.onClick(() => (timePeriod = TimePeriod.DAYS_3));
 		});
 		menu.addItem((item) => {
 			item.setTitle("7 days");
-			item.setChecked(duration === DurationFilter.DAYS_7);
-			item.onClick(() => (duration = DurationFilter.DAYS_7));
+			item.setChecked(timePeriod === TimePeriod.DAYS_7);
+			item.onClick(() => (timePeriod = TimePeriod.DAYS_7));
 		});
 		menu.addItem((item) => {
 			item.setTitle("14 days");
-			item.setChecked(duration === DurationFilter.DAYS_14);
-			item.onClick(() => (duration = DurationFilter.DAYS_14));
+			item.setChecked(timePeriod === TimePeriod.DAYS_14);
+			item.onClick(() => (timePeriod = TimePeriod.DAYS_14));
 		});
 		menu.addItem((item) => {
 			item.setTitle("30 days");
-			item.setChecked(duration === DurationFilter.DAYS_30);
-			item.onClick(() => (duration = DurationFilter.DAYS_30));
+			item.setChecked(timePeriod === TimePeriod.DAYS_30);
+			item.onClick(() => (timePeriod = TimePeriod.DAYS_30));
 		});
 		menu.addSeparator();
 		menu.addItem((item) => {
 			item.setTitle("Today");
-			item.setChecked(duration === DurationFilter.TODAY);
-			item.onClick(() => (duration = DurationFilter.TODAY));
+			item.setChecked(timePeriod === TimePeriod.TODAY);
+			item.onClick(() => (timePeriod = TimePeriod.TODAY));
 		});
 		menu.addItem((item) => {
 			item.setTitle("This week");
-			item.setChecked(duration === DurationFilter.WEEK);
-			item.onClick(() => (duration = DurationFilter.WEEK));
+			item.setChecked(timePeriod === TimePeriod.WEEK);
+			item.onClick(() => (timePeriod = TimePeriod.WEEK));
 		});
 		menu.addItem((item) => {
 			item.setTitle("This week iso");
-			item.setChecked(duration === DurationFilter.WEEK_ISO);
-			item.onClick(() => (duration = DurationFilter.WEEK_ISO));
+			item.setChecked(timePeriod === TimePeriod.WEEK_ISO);
+			item.onClick(() => (timePeriod = TimePeriod.WEEK_ISO));
 		});
 		menu.addItem((item) => {
 			item.setTitle("This month");
-			item.setChecked(duration === DurationFilter.MONTH);
-			item.onClick(() => (duration = DurationFilter.MONTH));
+			item.setChecked(timePeriod === TimePeriod.MONTH);
+			item.onClick(() => (timePeriod = TimePeriod.MONTH));
 		});
 		menu.showAtMouseEvent(nativeEvent);
 	}
@@ -218,54 +212,54 @@
 		});
 	}
 
-	$: if (duration || listSize) {
-		updateTrendingItems();
+	$: if (timePeriod || itemCount) {
+		updateTrendItems();
 	}
 
-	$: if (listSize) {
-		updateMostViewedItems();
+	$: if (itemCount) {
+		updateViewItems();
 	}
 
-	$: duration, listSize, currentView, saveSettings();
+	$: timePeriod, itemCount, currentView, saveSettings();
 </script>
 
 <div class="nav-header">
 	<div class="nav-buttons-container">
 		<IconButton
-			ariaLabel="Most viewed"
+			ariaLabel="Views"
 			iconId="eye"
-			isActive={currentView == TView.MOST_VIEWED}
-			on:click={handleMostViewedClick}
+			isActive={currentView == TView.VIEWS}
+			on:click={handleViewsClick}
 		/>
 		<IconButton
-			ariaLabel="Trending"
+			ariaLabel="Trends"
 			iconId="trending-up"
-			isActive={currentView == TView.TRENDING}
-			on:click={handleTrendingClick}
+			isActive={currentView == TView.TRENDS}
+			on:click={handleTrendsClick}
 		/>
 		<IconButton
-			ariaLabel="List size"
-			iconId="sigma"
-			on:click={handleListSizeClick}
+			ariaLabel="Item count"
+			iconId="hash"
+			on:click={handleItemCountClick}
 		/>
 		<IconButton
-			ariaLabel="Duration filter"
+			ariaLabel="Time period"
 			iconId="history"
-			disabled={currentView !== TView.TRENDING}
-			on:click={handleDurationClick}
+			disabled={currentView !== TView.TRENDS}
+			on:click={handleTimePeriodClick}
 		/>
 	</div>
 </div>
 <div class="view-content view-count-view">
-	{#if currentView === "most-viewed"}
-		<MostViewedView
-			renderItems={mostViewedRenderItems}
+	{#if currentView === TView.VIEWS}
+		<ViewsView
+			renderItems={viewRenderItems}
 			on:itemClick={handleItemClick}
 		/>
 	{/if}
-	{#if currentView === "trending"}
-		<TrendingView
-			renderItems={trendingRenderItems}
+	{#if currentView === TView.TRENDS}
+		<TrendsView
+			renderItems={trendRenderItems}
 			on:itemClick={handleItemClick}
 		/>
 	{/if}

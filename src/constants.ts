@@ -1,7 +1,5 @@
 import { LOG_LEVEL_OFF } from "./logger/constants";
-import { DurationFilter } from "./storage/types";
-import { TView } from "./svelte/types";
-import { ViewCountPluginSettings } from "./types";
+import { TimePeriod, TView, ViewCountPluginSettings } from "./types";
 
 export const VIEW_COUNT_ITEM_VIEW = "view-count";
 
@@ -13,7 +11,8 @@ export const DEFAULT_SETTINGS: ViewCountPluginSettings = {
 	logLevel: LOG_LEVEL_OFF,
 	excludedPaths: [],
 	templaterDelay: 0,
-	currentView: TView.MOST_VIEWED,
-	durationFilter: DurationFilter.DAYS_3,
-	listSize: 20,
+	currentView: TView.VIEWS,
+	timePeriod: TimePeriod.DAYS_3,
+	itemCount: 20,
 }
+

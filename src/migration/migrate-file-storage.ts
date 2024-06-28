@@ -1,7 +1,7 @@
 import { App } from "obsidian";
 import { ViewCountEntry, ViewCountEntry_1_2_2 } from "src/storage/types";
 import { getFilePath, parseEntries, stringifyEntries } from "src/storage/utils";
-import { ViewCountPluginSettings_1_2_2 } from "src/types";
+import { ViewCountPluginSettings_1_2_2 } from "src/types/types-1.2.2";
 
 export const migrateFileStorage = async (app: App, settings: ViewCountPluginSettings_1_2_2) => {
 	console.log("Migrating file storage");
