@@ -2,10 +2,10 @@ import { App, Notice, TFile } from "obsidian";
 import { getFilePath, parseEntries, shouldTrackFile, stringifyEntries } from "./utils";
 import Logger from "js-logger";
 import _ from "lodash";
-import { DurationFilter, ViewCountEntry } from "./types";
+import { ViewCountEntry } from "./types";
 import EventManager from "src/event/event-manager";
 import { getStartOf14DaysAgoMillis, getStartOf30DaysAgoMillis, getStartOf31DaysAgoMillis, getStartOf3DaysAgoMillis, getStartOf7DaysAgoMillis, getStartOfMonthMillis, getStartOfTodayMillis, getStartOfWeekMillis } from "src/utils/time-utils";
-import { ViewCountPluginSettings } from "src/types";
+import { TimePeriod, ViewCountPluginSettings } from "src/types";
 
 export default class ViewCountCache {
 	private app: App;
@@ -124,48 +124,48 @@ export default class ViewCountCache {
 	 * Gets the trending weight (the score) for a file.
 	 * Note: This is a public method for usage with DataviewJS
 	 * @param file - The file to get the weight for
-	 * @param duration - The duration used to calculate the weight
+	 * @param timePeriod - The time period used to calculate the weight
 	 */
-	getTrendingWeight(file: TFile, duration: DurationFilter) {
+	getTrendingWeight(file: TFile, timePeriod: TimePeriod) {
 		const entry = this.entries.find((entry) => entry.path === file.path);
 		if (!entry) {
 			return 0;
 		}
-		return this.getNumTimesOpenedForEntry(entry, duration);
+		return this.getNumTimesOpenedForEntry(entry, timePeriod);
 	}
 
-	getNumTimesOpenedForEntry(entry: ViewCountEntry, duration: DurationFilter) {
+	getNumTimesOpenedForEntry(entry: ViewCountEntry, timePeriod: TimePeriod) {
 		const { openLogs } = entry;
 
 		let timeMillis = 0;
 
-		switch (duration) {
-			case DurationFilter.MONTH:
+		switch (timePeriod) {
+			case TimePeriod.MONTH:
 				timeMillis = getStartOfMonthMillis();
 				break;
-			case DurationFilter.WEEK:
+			case TimePeriod.WEEK:
 				timeMillis = getStartOfWeekMillis(false);
 				break;
-			case DurationFilter.WEEK_ISO:
+			case TimePeriod.WEEK_ISO:
 				timeMillis = getStartOfWeekMillis(true);
 				break;
-			case DurationFilter.TODAY:
+			case TimePeriod.TODAY:
 				timeMillis = getStartOfTodayMillis();
 				break;
-			case DurationFilter.DAYS_30:
+			case TimePeriod.DAYS_30:
 				timeMillis = getStartOf30DaysAgoMillis();
 				break;
-			case DurationFilter.DAYS_14:
+			case TimePeriod.DAYS_14:
 				timeMillis = getStartOf14DaysAgoMillis();
 				break;
-			case DurationFilter.DAYS_7:
+			case TimePeriod.DAYS_7:
 				timeMillis = getStartOf7DaysAgoMillis();
 				break;
-			case DurationFilter.DAYS_3:
+			case TimePeriod.DAYS_3:
 				timeMillis = getStartOf3DaysAgoMillis();
 				break;
 			default:
-				throw new Error(`DurationFilter ${duration} is not supported`);
+				throw new Error(`TimePeriod ${timePeriod} is not supported`);
 		}
 
 		return openLogs.filter((log) => log.timestampMillis >= timeMillis).length;
@@ -290,7 +290,7 @@ export default class ViewCountCache {
 		const updatedEntries = this.entries.map((entry) => {
 			if (entry.path === targetPath) {
 				//Keep 31 days of logs.
-				//This will support both 30-days and month durations
+				//This will support both 30-days and month time periods
 				const start31DaysAgoMillis = getStartOf31DaysAgoMillis();
 				const filteredLogs = entry.openLogs.filter((log) => log.timestampMillis >= start31DaysAgoMillis);
 

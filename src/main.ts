@@ -1,6 +1,6 @@
 import { Plugin, TFile } from 'obsidian';
 import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
-import { ViewCountPluginSettings, ViewCountPluginSettings_1_2_1, ViewCountPluginSettings_1_2_2, ViewCountPluginSettings_2_3_1 } from './types';
+import { TView, TimePeriod, ViewCountPluginSettings } from './types';
 import ViewCountItemView from './obsidian/view-count-item-view';
 import { DEFAULT_SETTINGS, VIEW_COUNT_ITEM_VIEW } from './constants';
 import Logger from 'js-logger';
@@ -10,8 +10,10 @@ import { isVersionLessThan } from './utils';
 import ViewCountCache from './storage/view-count-cache';
 import { migrateFileStorage } from './migration/migrate-file-storage';
 import { migratePropertyStorage } from './migration/migrate-property-storage';
-import { DurationFilter } from './storage/types';
-import { TView } from './svelte/types';
+import { ViewCountPluginSettings_1_2_2 } from './types/types-1.2.2';
+import { ViewCountPluginSettings_1_2_1 } from './types/types-1.2.1';
+import { ViewCountPluginSettings_2_3_1 } from './types/types-2.3.1';
+import { DurationFilter_2_4_0, TView_2_4_0, ViewCountPluginSettings_2_4_0 } from './types/types-2.4.0';
 
 export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings = DEFAULT_SETTINGS;
@@ -96,12 +98,26 @@ export default class ViewCountPlugin extends Plugin {
 				if (isVersionLessThan(settingsVersion, "2.4.0")) {
 					console.log("Migrating settings from 2.3.1 to 2.4.0");
 					const typedData = (data as unknown) as ViewCountPluginSettings_2_3_1;
-					const newData: ViewCountPluginSettings = {
+					const newData: ViewCountPluginSettings_2_4_0 = {
 						...typedData,
-						durationFilter: DurationFilter.DAYS_3,
-						currentView: TView.MOST_VIEWED,
+						durationFilter: DurationFilter_2_4_0.DAYS_3,
+						currentView: TView_2_4_0.MOST_VIEWED,
 						listSize: 20
 					}
+					data = newData as unknown as Record<string, unknown>;
+				}
+
+				if (isVersionLessThan(settingsVersion, "2.4.1")) {
+					console.log("Migrating settings from 2.4.0 to 2.4.1");
+					const typedData = (data as unknown) as ViewCountPluginSettings_2_4_0;
+					const newData: ViewCountPluginSettings = {
+						...typedData,
+						timePeriod: TimePeriod.DAYS_3,
+						currentView: TView.VIEWS,
+						itemCount: 20
+					}
+					delete (newData as any).durationFilter;
+					delete (newData as any).listSize;
 					data = newData as unknown as Record<string, unknown>;
 				}
 			}

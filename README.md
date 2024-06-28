@@ -96,11 +96,11 @@ Let's analyze this codeblock:
 const plugin = this.app.plugins.plugins["view-count"];
 const cache = plugin.viewCountCache;
 
-const DURATION = "7-days";
+const TIME_PERIOD = "7-days";
 
 dv.table(["Name", "Trending Weight"],
-    dv.pages().sort(p => cache.getTrendingWeight(p.file, DURATION), "desc")
-        .map(p => [p.file.name, cache.getTrendingWeight(p.file, DURATION)])
+    dv.pages().sort(p => cache.getTrendingWeight(p.file, TIME_PERIOD), "desc")
+        .map(p => [p.file.name, cache.getTrendingWeight(p.file, TIME_PERIOD)])
 	        .slice(0,10)
 );
 ```
@@ -115,7 +115,7 @@ Let's analyze this codeblock:
 5. Format an array of data that includes object with just the file name and the trending weight
 6. Limit the results to 10 notes
 
-The duration can be updated with various values. See the [Duration](#duration) section below.
+The time period can be updated with various values. See the [time period](#time-period) section below.
 
 ## API
 
@@ -135,7 +135,7 @@ Then you can use the cache to get a view count or trending weight.
 
 ```javascript
 //Get the trending weight
-const weight = cache.getTrendingWeight(file, duration);
+const weight = cache.getTrendingWeight(file, timePeriod);
 console.log(weight);
 //output: 22
 
@@ -149,16 +149,16 @@ Here are the typescript definitions for these functions:
 
 ```javascript
 getViewCount: (file: TFile) => number;
-getTrendingWeight: (file: TFile, duration: DurationFilter) => number;
+getTrendingWeight: (file: TFile, timePeriod: TimePeriod) => number;
 ```
 
-### Duration
+### Time period
 
-The `getTrendingWeight` function accepts a duration.
+The `getTrendingWeight` function accepts a time period.
 
 Here are the options:
 
-| Duration   | Description                           |
+| Value      | Description                           |
 | ---------- | ------------------------------------- |
 | `3-days`   | The last 3 days                       |
 | `7-days`   | The last 7 days                       |
