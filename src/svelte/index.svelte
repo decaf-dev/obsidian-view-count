@@ -28,7 +28,6 @@
 		updateTrendingItems();
 	});
 
-	//TODO add a timer to update trending items?
 	onMount(() => {
 		//TODO optimize event. Don't update all items?
 		function handleRefreshEvent() {
@@ -64,7 +63,7 @@
 			return { file, viewCount };
 		});
 		items = items.slice(0, listSize);
-		return items;
+		mostViewedRenderItems = items;
 	}
 
 	function updateTrendingItems() {
@@ -91,7 +90,7 @@
 		items.sort((a, b) => b.timesOpened - a.timesOpened);
 		items = items.filter((item) => item.timesOpened > 0);
 		items = items.slice(0, listSize);
-		return items;
+		trendingRenderItems = items;
 	}
 
 	function handleMostViewedClick() {
@@ -195,11 +194,11 @@
 	}
 
 	$: if (duration || listSize) {
-		trendingRenderItems = updateTrendingItems();
+		updateTrendingItems();
 	}
 
 	$: if (listSize) {
-		mostViewedRenderItems = updateMostViewedItems();
+		updateMostViewedItems();
 	}
 </script>
 

@@ -1,9 +1,9 @@
 {
 	"id": "view-count",
 	"name": "View Count",
-	"version": "2.3.0",
+	"version": "2.3.1",
 	"minAppVersion": "1.4.0",
-	"description": "Tracks view count for each vault file.",
+	"description": "Track view count for each vault file.",
 	"author": "DecafDev",
 	"authorUrl": "https://github.com/decaf-dev",
 	"fundingUrl": "https://ko-fi.com/decaf_dev",
