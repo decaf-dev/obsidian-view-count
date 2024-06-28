@@ -21,17 +21,18 @@ export default class ViewCountCache {
 	}
 
 	async load() {
-		Logger.trace("ViewCountCache load");
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "load", message: "called" });
 		const path = getFilePath(this.app);
 		const exists = await this.app.vault.adapter.exists(path);
 
 		if (!exists) {
 			const data = stringifyEntries([]);
 			try {
-				Logger.debug("Creating new cache...");
+				Logger.debug({ fileName: "view-count-cache.ts", functionName: "load", message: "creating new cache..." });
 				await this.app.vault.create(path, data);
 			} catch (err) {
-				Logger.error("Error creating cache: ", (err as Error).message);
+				const error = err as Error;
+				Logger.error({ fileName: "view-count-cache.ts", functionName: "load", message: "error creating cache" }, { error: error.message });
 				new Notice("View Count: error creating cache");
 			}
 			return;
@@ -40,31 +41,33 @@ export default class ViewCountCache {
 		try {
 			const result = await this.app.vault.adapter.read(path);
 			this.entries = parseEntries(result);
-			Logger.debug("Loaded view count entries", { entries: this.entries });
+			Logger.debug({ fileName: "view-count-cache.ts", functionName: "load", message: "loaded view count entries" }, { entries: this.entries });
 			this.refresh();
 		} catch (err) {
-			Logger.error("Error loading cache: ", (err as Error).message);
+			const error = err as Error;
+			Logger.error({ fileName: "view-count-cache.ts", functionName: "load", message: "error loading cache" }, { error: error.message });
 			new Notice("View Count: error loading cache");
 		}
 	}
 
 	async save() {
-		Logger.trace("ViewCountCache save");
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "save", message: "called" });
 		try {
 			const path = getFilePath(this.app);
 			const data = stringifyEntries(this.entries);
 			await this.app.vault.adapter.write(path, data);
 		} catch (err) {
-			Logger.error("Error saving file cache: ", (err as Error).message);
+			const error = err as Error;
+			Logger.error({ fileName: "view-count-cache.ts", functionName: "save", message: "error saving file cache" }, { error: error.message });
 			new Notice("View Count: error saving file cache");
 		}
 	}
 
 	async handleFileOpen(file: TFile) {
-		Logger.trace("ViewCountCache handleFileOpen");
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "handleFileOpen", message: "called" });
 		const { excludedPaths, templaterDelay, saveViewCountToFrontmatter } = this.settings;
 		if (!shouldTrackFile(file, excludedPaths)) {
-			Logger.debug(`File ${file.path} is set to be excluded. Returning.`);
+			Logger.debug({ fileName: "view-count-cache.ts", functionName: "handeFileOpen", message: `file "${file.path}" is set to be excluded. returning...` });
 			return;
 		}
 
@@ -79,7 +82,7 @@ export default class ViewCountCache {
 			//If we're creating a new file and the templater delay is greater than 0, wait before updating the view count property in frontmatter
 			//This is to prevent the view count from overwriting the templater output
 			if (!entry && templaterDelay > 0) {
-				Logger.debug(`Templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.`);
+				Logger.debug({ fileName: "view-count-cache.ts", functionName: "handleFileOpen", message: `templater delay is greater than 0. Waiting ${templaterDelay}ms before incrementing the view count.` });
 				await new Promise(resolve => setTimeout(resolve, templaterDelay));
 			}
 			await this.updateViewCountProperty(file);
@@ -173,8 +176,9 @@ export default class ViewCountCache {
 	}
 
 	async renameEntry(newPath: string, oldPath: string) {
-		Logger.trace("ViewCountCache renameEntry");
-		Logger.debug("Renaming entry", { oldPath, newPath });
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "renameEntry", message: "called" });
+		Logger.debug({ fileName: "view-count-cache.ts", functionName: "renameEntry", message: "called" }, { oldPath, newPath });
+
 		this.entries = this.entries.map((entry) => {
 			if (entry.path === oldPath) {
 				entry.path = newPath;
@@ -187,8 +191,8 @@ export default class ViewCountCache {
 	}
 
 	async deleteEntry(file: TFile) {
-		Logger.trace("ViewCountCache deleteEntry");
-		Logger.debug("Deleting entry", { path: file.path });
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "deleteEntry", message: "called" });
+		Logger.debug({ fileName: "view-count-cache.ts", functionName: "deleteEntry", message: "deleting entry" }, { path: file.path });
 		this.entries = this.entries.filter((entry) => entry.path !== file.path);
 
 		this.debounceSave();
@@ -214,7 +218,7 @@ export default class ViewCountCache {
 	}
 
 	async syncViewCountToFrontmatter() {
-		Logger.trace("ViewCountCache syncViewCountToFrontmatter");
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "syncViewCountToFrontmatter", message: "called" });
 
 		const { saveViewCountToFrontmatter } = this.settings;
 		for (const entry of this.entries) {
@@ -231,7 +235,7 @@ export default class ViewCountCache {
 	}
 
 	private async updateViewCountProperty(file: TFile) {
-		Logger.trace("ViewCountCache updateViewCountPropertyInFrontmatter");
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "updateViewCountProperty", message: "called" });
 		const { viewCountPropertyName, viewCountType } = this.settings;
 
 		const entry = this.entries.find((entry) => entry.path === file.path);
@@ -241,28 +245,28 @@ export default class ViewCountCache {
 
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			if (viewCountType === "unique-days-opened") {
-				Logger.debug("Updating view count property in frontmatter", { path: file.path, viewCountPropertyName, viewCount: entry.uniqueDaysOpened, type: "unique-days-opened" });
+				Logger.debug({ fileName: "view-count-cache.ts", functionName: "updateViewCountProperty", message: "ipdating view count property in frontmatter" }, { path: file.path, viewCountPropertyName, viewCount: entry.uniqueDaysOpened, type: "unique-days-opened" });
 				frontmatter[viewCountPropertyName] = entry.uniqueDaysOpened;
 			} else {
-				Logger.debug("Updating view count property in frontmatter", { path: file.path, viewCountPropertyName, viewCount: entry.totalTimesOpened, type: "total-times-opened" });
+				Logger.debug({ fileName: "view-count-cache.ts", functionName: "updateViewCountProperty", message: "ipdating view count property in frontmatter" }, { path: file.path, viewCountPropertyName, viewCount: entry.totalTimesOpened, type: "total-times-opened" });
 				frontmatter[viewCountPropertyName] = entry.totalTimesOpened;
 			}
 		});
 	}
 
 	private async deleteViewCountProperty(file: TFile) {
-		Logger.trace("ViewCountCache deleteViewCountPropertyInFrontmatter");
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "deleteViewCountProperty", message: "called" });
 		const { viewCountPropertyName } = this.settings;
 
-		Logger.debug("Deleting view count property in frontmatter", { path: file.path, viewCountPropertyName });
+		Logger.debug({ fileName: "view-count-cache.ts", functionName: "deleteViewCountProperty", message: "deleting view count property in frontmatter" }, { path: file.path, viewCountPropertyName });
 		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			frontmatter[viewCountPropertyName] = undefined;
 		});
 	}
 
 	private async createEntry(file: TFile) {
-		Logger.trace("ViewCountCache createEntry");
-		Logger.debug("Creating new entry", { path: file.path });
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "createEntry", message: "called" });
+		Logger.debug({ fileName: "view-count-cache.ts", functionName: "createEntry", message: "creating new entry" }, { path: file.path });
 
 		const updatedEntries = [...this.entries, {
 			path: file.path,
@@ -274,12 +278,13 @@ export default class ViewCountCache {
 	}
 
 	private async addOpenLogEntry(targetPath: string) {
-		Logger.trace("ViewCountCache addOpenLogEntry");
-		Logger.debug("Adding to open log", { path: targetPath });
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "addOpenLogEntry", message: "called" });
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "addOpenLogEntry", message: "adding to open log" }, { targetPath });
 
 		const updatedEntries = this.entries.map((entry) => {
 			if (entry.path === targetPath) {
-				//Keep 31 days of logs. This will support both 30-days and month durations
+				//Keep 31 days of logs.
+				//This will support both 30-days and month durations
 				const start31DaysAgoMillis = getStartOf31DaysAgoMillis();
 				const filteredLogs = entry.openLogs.filter((log) => log.timestampMillis >= start31DaysAgoMillis);
 
@@ -296,8 +301,8 @@ export default class ViewCountCache {
 	}
 
 	private async incrementViewCount(targetPath: string) {
-		Logger.trace("ViewCountCache incrementViewCount");
-		Logger.debug("Incrementing view count", { path: targetPath });
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "incrementViewCount", message: "called" });
+		Logger.debug({ fileName: "view-count-cache.ts", functionName: "incrementViewCount", message: "incrementing view count" }, { targetPath });
 
 		const updatedEntries = this.entries.map((entry) => {
 			if (entry.path === targetPath) {
@@ -324,6 +329,7 @@ export default class ViewCountCache {
 
 
 	private refresh() {
+		Logger.trace({ fileName: "view-count-cache.ts", functionName: "refresh", message: "called" });
 		EventManager.getInstance().emit("refresh-item-view");
 	}
 }

@@ -21,19 +21,7 @@ export default class ViewCountPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-
-		//Setup logger
-		Logger.useDefaults();
-		Logger.setHandler(function (messages) {
-			const { message, data } = formatMessageForLogger(...messages);
-			console.log(message);
-			if (data) {
-				console.log(data);
-			}
-		});
-
-		const logLevel = stringToLogLevel(this.settings.logLevel);
-		Logger.setLevel(logLevel);
+		this.setupLogger();
 
 		const viewCountCache = new ViewCountCache(this.app, this.settings);
 		this.viewCountCache = viewCountCache;
@@ -132,7 +120,7 @@ export default class ViewCountPlugin extends Plugin {
 			const viewType = leaf.view.getViewType();
 
 			if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType != "dataloom" && viewType != "audio" && viewType != "video") {
-				Logger.debug("View count not supported for view type", { viewType });
+				Logger.debug({ fileName: "main.ts", functionName: "active-leaf-change", message: "view count not supported for view type" }, { viewType });
 				this.viewCountStatusBarItem?.setText("");
 				return;
 			} else {
@@ -168,7 +156,7 @@ export default class ViewCountPlugin extends Plugin {
 
 
 	private async handleFileOpen(file: TFile) {
-		Logger.trace("main handleFileOpen");
+		Logger.trace({ fileName: "main.ts", functionName: "handleFileOpen", message: "called" });
 		if (this.viewCountCache === null) {
 			throw new Error("View count cache is null");
 		}
@@ -183,5 +171,31 @@ export default class ViewCountPlugin extends Plugin {
 		const viewCount = this.viewCountCache.getViewCount(file);
 		const viewName = viewCount === 1 ? "view" : "views";
 		this.viewCountStatusBarItem.setText(`${viewCount} ${viewName}`);
+	}
+
+	private setupLogger() {
+		Logger.useDefaults();
+		Logger.setHandler(function (messages, context) {
+			const { message, data } = formatMessageForLogger(...messages);
+			if (context.level === Logger.WARN) {
+				console.warn(message);
+				if (data) {
+					console.warn(data);
+				}
+			} else if (context.level === Logger.ERROR) {
+				console.error(message);
+				if (data) {
+					console.error(data);
+				}
+			} else {
+				console.log(message);
+				if (data) {
+					console.log(data);
+				}
+			}
+		});
+
+		const logLevel = stringToLogLevel(this.settings.logLevel);
+		Logger.setLevel(logLevel);
 	}
 }

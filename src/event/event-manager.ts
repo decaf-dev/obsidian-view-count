@@ -40,8 +40,8 @@ export default class EventManager {
 
 	// Method to trigger all callbacks associated with an event
 	public emit(eventName: PluginEvent, ...data: any[]): void {
-		Logger.trace("EventManager emit");
-		Logger.debug("Emiting event", { event: eventName });
+		Logger.trace({ fileName: "event-manager.ts", functionName: "emit", message: "called" });
+		Logger.trace({ fileName: "main.ts", functionName: "emit", message: "emiting event" }, { eventName });
 		if (!this.eventListeners[eventName]) {
 			return;
 		}
