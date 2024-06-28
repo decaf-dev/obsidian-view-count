@@ -15,4 +15,13 @@ export interface ViewCountEntry_1_2_2 {
 	lastViewMillis: number;
 }
 
-export type DurationFilter = "month" | "week-iso" | "week" | "30-days" | "14-days" | "7-days";
+export type RenderSize = 10 | 15 | 20 | 25 | 50 | 100;
+
+export enum DurationFilter {
+	MONTH = "month",
+	WEEK_ISO = "week-iso",
+	WEEK = "week",
+	DAYS_30 = "30-days",
+	DAYS_14 = "14-days",
+	DAYS_7 = "7-days"
+}

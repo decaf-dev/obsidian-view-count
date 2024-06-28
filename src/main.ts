@@ -1,26 +1,15 @@
-import { Plugin, TFile, normalizePath } from 'obsidian';
+import { Plugin, TFile } from 'obsidian';
 import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
 import { ViewCountPluginSettings, ViewCountPluginSettings_1_2_1, ViewCountPluginSettings_1_2_2 } from './types';
 import ViewCountItemView from './obsidian/view-count-item-view';
-import { VIEW_COUNT_ITEM_VIEW } from './constants';
+import { DEFAULT_SETTINGS, VIEW_COUNT_ITEM_VIEW } from './constants';
 import Logger from 'js-logger';
-import { LOG_LEVEL_OFF } from './logger/constants';
 import { formatMessageForLogger, stringToLogLevel } from './logger';
 import _ from 'lodash';
 import { isVersionLessThan } from './utils';
 import ViewCountCache from './storage/view-count-cache';
 import { migrateFileStorage } from './migration/migrate-file-storage';
 import { migratePropertyStorage } from './migration/migrate-property-storage';
-
-const DEFAULT_SETTINGS: ViewCountPluginSettings = {
-	viewCountType: "unique-days-opened",
-	saveViewCountToFrontmatter: false,
-	viewCountPropertyName: "view-count",
-	pluginVersion: "",
-	logLevel: LOG_LEVEL_OFF,
-	excludedPaths: [],
-	templaterDelay: 0,
-}
 
 export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings = DEFAULT_SETTINGS;
