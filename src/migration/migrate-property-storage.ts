@@ -1,4 +1,3 @@
-import Logger from "js-logger";
 import { App } from "obsidian";
 import { ViewCountEntry } from "src/storage/types";
 import { getFilePath, stringifyEntries } from "src/storage/utils";

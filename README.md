@@ -4,18 +4,17 @@
 
 View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobile. It allows you to track the view count for each file in your vault.
 
-![](/readme/property.png)
-
-![](/readme/status-bar.png)
-
 ## Table of contents
 
+-   [Demo](#demo)
 -   [Installation](#installation)
 -   [Usage](#usage)
 -   [Dataview](#dataview)
 -   [API](#api)
 -   [Settings](#settings)
 -   [License](#license)
+
+## Demo
 
 ## Installation
 
@@ -45,8 +44,6 @@ There are 2 different lists within the view count:
 -   A list of the 50 most viewed notes in your vault sorted in descending order. Click on the eye icon to see this list.
 
 -   A list of the 50 notes with the highest trending weight sorted in descending order. Click on the trending icon to see this list.
-
-https://github.com/decaf-dev/obsidian-view-count/assets/40307803/1f97f34a-bc72-45c4-90ef-d71ab0ea6347
 
 ## Dataview
 
@@ -174,7 +171,8 @@ The view count information for all files is stored in `.obsidian/view-count.json
 
 The name of the property that the view will be stored in.
 
-> Please rename the existing property before updating this setting. You can use the rename option in the `All Properties` view in the sidebar to do this.
+> [!WARNING]
+> Please rename the existing view count property before updating this value. This will prevent the creation of a duplicate property. You can rename the existing property using the **rename** option in the **All Properties** view in the right sidebar.
 
 ### Templater delay
 

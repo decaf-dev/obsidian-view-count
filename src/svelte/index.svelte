@@ -1,22 +1,24 @@
 <script lang="ts">
-	import { TFile, setIcon } from "obsidian";
+	import { Menu, TFile } from "obsidian";
 	import { onMount } from "svelte";
 	import store, { ViewCountPluginStore } from "./store";
 	import EventManager from "src/event/event-manager";
-	import { ViewCountEntry } from "src/storage/types";
+	import {
+		DurationFilter,
+		ListSize,
+		ViewCountEntry,
+	} from "src/storage/types";
 	import MostViewedView from "./components/most-viewed-view.svelte";
 	import TrendingView from "./components/trending-view.svelte";
-	import { MostViewedRenderItem, TrendingRenderItem } from "./types";
-
+	import { MostViewedRenderItem, TrendingRenderItem, TView } from "./types";
+	import IconButton from "./components/icon-button.svelte";
 	import "./styles.css";
 
-	type ViewType = "most-viewed" | "trending";
-
-	let trendingIconRef: HTMLElement | null = null;
-	let mostViewedIconRef: HTMLElement | null = null;
-	let currentView: ViewType = "most-viewed";
+	let currentView: TView = TView.MOST_VIEWED;
 	let mostViewedRenderItems: MostViewedRenderItem[] = [];
 	let trendingRenderItems: TrendingRenderItem[] = [];
+	let duration: DurationFilter = DurationFilter.WEEK_ISO;
+	let listSize: ListSize = 20;
 
 	let pluginStore: ViewCountPluginStore;
 
@@ -26,18 +28,7 @@
 		updateTrendingItems();
 	});
 
-	onMount(() => {
-		if (trendingIconRef) {
-			setIcon(trendingIconRef, "trending-up");
-		}
-
-		if (mostViewedIconRef) {
-			setIcon(mostViewedIconRef, "eye");
-		}
-	});
-
 	//TODO add a timer to update trending items?
-
 	onMount(() => {
 		//TODO optimize event. Don't update all items?
 		function handleRefreshEvent() {
@@ -55,10 +46,10 @@
 	});
 
 	function updateMostViewedItems() {
-		let sortedEntries =
+		const sortedEntries =
 			pluginStore.cache.getEntriesSortedByViewCount("desc");
 
-		let entryFiles: Map<ViewCountEntry, TFile> = new Map();
+		const entryFiles: Map<ViewCountEntry, TFile> = new Map();
 		sortedEntries.forEach((entry) => {
 			const file = pluginStore.app.vault.getFileByPath(entry.path);
 			if (file !== null) {
@@ -72,16 +63,15 @@
 			const viewCount = pluginStore.cache.getViewCountForEntry(entry);
 			return { file, viewCount };
 		});
-
-		items = items.slice(0, 50);
-		mostViewedRenderItems = items;
+		items = items.slice(0, listSize);
+		return items;
 	}
 
 	function updateTrendingItems() {
-		let sortedEntries =
+		const sortedEntries =
 			pluginStore.cache.getEntriesSortedByViewCount("desc");
 
-		let entryFiles: Map<ViewCountEntry, TFile> = new Map();
+		const entryFiles: Map<ViewCountEntry, TFile> = new Map();
 		sortedEntries.forEach((entry) => {
 			const file = pluginStore.app.vault.getFileByPath(entry.path);
 			if (file !== null) {
@@ -89,37 +79,105 @@
 			}
 		});
 
-		//TODO add selection of time period
 		let items: TrendingRenderItem[] = Array.from(entryFiles.entries()).map(
 			([entry, file]) => {
 				const timesOpened = pluginStore.cache.getNumTimesOpenedForEntry(
 					entry,
-					"7-days",
+					duration,
 				);
 				return { file, timesOpened: timesOpened };
 			},
 		);
 		items.sort((a, b) => b.timesOpened - a.timesOpened);
 		items = items.filter((item) => item.timesOpened > 0);
-
-		items = items.slice(0, 50);
-		trendingRenderItems = items;
+		items = items.slice(0, listSize);
+		return items;
 	}
 
 	function handleMostViewedClick() {
-		currentView = "most-viewed";
+		currentView = TView.MOST_VIEWED;
 	}
 
 	function handleTrendingClick() {
-		currentView = "trending";
+		currentView = TView.TRENDING;
 	}
 
-	function getNavActionButtonClass(currentView: ViewType, view: ViewType) {
-		let className = "clickable-icon nav-action-button";
-		if (currentView === view) {
-			return `${className} is-active`;
-		}
-		return className;
+	function handleListSizeClick(e: CustomEvent) {
+		const { nativeEvent } = e.detail;
+
+		const menu = new Menu();
+		menu.setUseNativeMenu(true);
+
+		menu.addItem((item) => {
+			item.setTitle("10");
+			item.setChecked(listSize === 10);
+			item.onClick(() => (listSize = 10));
+		});
+		menu.addItem((item) => {
+			item.setTitle("15");
+			item.setChecked(listSize === 15);
+			item.onClick(() => (listSize = 15));
+		});
+		menu.addItem((item) => {
+			item.setTitle("20");
+			item.setChecked(listSize === 20);
+			item.onClick(() => (listSize = 20));
+		});
+		menu.addItem((item) => {
+			item.setTitle("25");
+			item.setChecked(listSize === 25);
+			item.onClick(() => (listSize = 25));
+		});
+		menu.addItem((item) => {
+			item.setTitle("50");
+			item.setChecked(listSize === 50);
+			item.onClick(() => (listSize = 50));
+		});
+		menu.addItem((item) => {
+			item.setTitle("100");
+			item.setChecked(listSize === 100);
+			item.onClick(() => (listSize = 100));
+		});
+		menu.showAtMouseEvent(nativeEvent);
+	}
+
+	function handleDurationClick(e: CustomEvent) {
+		const { nativeEvent } = e.detail;
+
+		const menu = new Menu();
+		menu.setUseNativeMenu(true);
+		menu.addItem((item) => {
+			item.setTitle("7 days");
+			item.setChecked(duration === DurationFilter.DAYS_7);
+			item.onClick(() => (duration = DurationFilter.DAYS_7));
+		});
+		menu.addItem((item) => {
+			item.setTitle("14 days");
+			item.setChecked(duration === DurationFilter.DAYS_14);
+			item.onClick(() => (duration = DurationFilter.DAYS_14));
+		});
+		menu.addItem((item) => {
+			item.setTitle("30 days");
+			item.setChecked(duration === DurationFilter.DAYS_30);
+			item.onClick(() => (duration = DurationFilter.DAYS_30));
+		});
+		menu.addSeparator();
+		menu.addItem((item) => {
+			item.setTitle("Week");
+			item.setChecked(duration === DurationFilter.WEEK);
+			item.onClick(() => (duration = DurationFilter.WEEK));
+		});
+		menu.addItem((item) => {
+			item.setTitle("Week Iso");
+			item.setChecked(duration === DurationFilter.WEEK_ISO);
+			item.onClick(() => (duration = DurationFilter.WEEK_ISO));
+		});
+		menu.addItem((item) => {
+			item.setTitle("Month");
+			item.setChecked(duration === DurationFilter.MONTH);
+			item.onClick(() => (duration = DurationFilter.MONTH));
+		});
+		menu.showAtMouseEvent(nativeEvent);
 	}
 
 	function handleItemClick(e: CustomEvent) {
@@ -136,41 +194,40 @@
 		});
 	}
 
-	$: mostViewedClassName = getNavActionButtonClass(
-		currentView,
-		"most-viewed",
-	);
-	$: trendingClassName = getNavActionButtonClass(currentView, "trending");
+	$: if (duration || listSize) {
+		trendingRenderItems = updateTrendingItems();
+	}
+
+	$: if (listSize) {
+		mostViewedRenderItems = updateMostViewedItems();
+	}
 </script>
 
 <div class="nav-header">
 	<div class="nav-buttons-container">
-		<div
-			class={mostViewedClassName}
-			tabindex="0"
-			role="button"
-			aria-label="Most viewed"
-			bind:this={mostViewedIconRef}
+		<IconButton
+			ariaLabel="Most viewed"
+			iconId="eye"
+			isActive={currentView == TView.MOST_VIEWED}
 			on:click={handleMostViewedClick}
-			on:keydown={(e) => {
-				if (e.key === "Enter" || e.key === " ") {
-					handleMostViewedClick();
-				}
-			}}
-		></div>
-		<div
-			class={trendingClassName}
-			tabindex="0"
-			role="button"
-			aria-label="Trending"
-			bind:this={trendingIconRef}
+		/>
+		<IconButton
+			ariaLabel="Trending"
+			iconId="trending-up"
+			isActive={currentView == TView.TRENDING}
 			on:click={handleTrendingClick}
-			on:keydown={(e) => {
-				if (e.key === "Enter" || e.key === " ") {
-					handleTrendingClick();
-				}
-			}}
-		></div>
+		/>
+		<IconButton
+			ariaLabel="List size"
+			iconId="sigma"
+			on:click={handleListSizeClick}
+		/>
+		<IconButton
+			ariaLabel="Duration filter"
+			iconId="history"
+			disabled={currentView !== TView.TRENDING}
+			on:click={handleDurationClick}
+		/>
 	</div>
 </div>
 <div class="view-content view-count-view">
