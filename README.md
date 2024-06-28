@@ -16,6 +16,10 @@ View count is an [Obsidian.md](https://obsidian.md) plugin for desktop and mobil
 
 ## Demo
 
+<video src="https://github.com/decaf-dev/obsidian-view-count/assets/40307803/e51fec6b-2549-4c3a-bff3-65f6d3009671" controls="controls" style="max-width: 100%;">
+  Your browser does not support the video tag.
+</video>
+
 ## Installation
 
 1. In Obsidian, open **Settings**
