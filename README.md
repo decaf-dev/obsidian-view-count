@@ -171,36 +171,34 @@ Here are the options:
 
 ## Settings
 
-### View count type
+### Count method
 
-View count can defined 2 ways: the number of times a file has been opened or the number of unique days a file has been opened.
+The method used to calculate view counts. This can be the total number of times a file has been opened or the unique days a file has been opened.
 
-This option can be toggled whenever without affecting the functionality of the plugin. Both the values will be stored in the `.obsidian/view-count.json` file.
+For example, consider a user that opened a file 3 times in 1 day. Using `Total times opened` the view count would be 3. However, using `Unique days opened` the view count would be 1.
 
-A unique day is considered an opening of a file after 12 am your local time.
+A unique day is considered an opening of a file after 12 am local time.
 
 ### Excluded paths
 
-The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. `folder1,folder2/inner`
+The folder paths that should be excluded from view count tracking. Please separate individual paths by commas e.g. `folder1,folder2`
 
-### Sync view count to frontmatter
+### Sync view count
 
-For each markdown note, save the current view count to a property in its frontmatter.
+The view count for all files is stored in a JSON file located in the Obsidian configuration folder e.g. `.obsidian/view-count.json`. When `Sync view count` is enabled, the plugin will add a view count property to all markdown notes and continuously update them to match the values stored in the JSON file.
 
-This setting makes view count available on mobile. In the future, this toggling this setting will not be needed for mobile.
+Enabling this setting makes view count visible on mobile devices.
 
-The view count information for all files is stored in `.obsidian/view-count.json`. This setting is optional, as it duplicates data that already exists into the frontmatter of your markdown notes.
+### Property name
 
-### View count property name
-
-The name of the property that the view will be stored in.
+The name of the property that the view count will be stored in.
 
 > [!WARNING]
-> Please rename the existing view count property before updating this value. This will prevent the creation of a duplicate property. You can rename the existing property using the **rename** option in the **All Properties** view in the right sidebar.
+> Please rename the existing view count property before updating this value. You can rename the existing property using the **rename** option in the **All Properties** view in the right sidebar.
 
 ### Templater delay
 
-The delay in milliseconds before inserting view count frontmatter. Increase this value if you're using the Templater plugin and your template is being overwritten.
+The time to wait in milliseconds before adding a view count property to a new markdown note. You should increase this value if you're using the [Templater plugin](https://github.com/SilentVoid13/Templater) and the template applied during new note creation is being overwritten.
 
 ## License
 
