@@ -39,14 +39,14 @@ class ViewCountSettingsTab extends PluginSettingTab {
 				component
 					.addOption("unique-days-opened", "Unique days opened")
 					.addOption("total-times-opened", "Total times opened")
-					.setValue(this.plugin.settings.viewCountType)
+					.setValue(this.plugin.settings.countMethod)
 					.onChange(async (value) => {
-						this.plugin.settings.viewCountType = value as
+						this.plugin.settings.countMethod = value as
 							| "unique-days-opened"
 							| "total-times-opened";
 						await this.plugin.saveSettings();
 
-						if (this.plugin.settings.saveViewCountToFrontmatter) {
+						if (this.plugin.settings.syncToFrontmatter) {
 							await viewCountCache.syncViewCountToFrontmatter();
 						}
 						await viewCountCache.debounceRefresh();
@@ -72,16 +72,29 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Sync view count")
 			.setDesc(
-				"When enabled, a frontmatter property will be added and continuously updated in all relevant markdown notes to reflect the view count values stored in the JSON file."
+				"Add and continuously update a frontmatter property in notes to match view count values stored in the JSON file."
 			)
 			.addToggle((component) =>
 				component
-					.setValue(this.plugin.settings.saveViewCountToFrontmatter)
+					.setValue(this.plugin.settings.syncToFrontmatter)
 					.onChange(async (value) => {
-						this.plugin.settings.saveViewCountToFrontmatter = value;
+						this.plugin.settings.syncToFrontmatter = value;
 
 						await this.plugin.saveSettings();
 						await viewCountCache.syncViewCountToFrontmatter();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Skip new notes")
+			.setDesc("Skip adding a view count property to new notes.")
+			.addToggle((component) =>
+				component
+					.setValue(this.plugin.settings.skipNewNotes)
+					.onChange(async (value) => {
+						this.plugin.settings.skipNewNotes = value;
+
+						await this.plugin.saveSettings();
 					})
 			);
 
@@ -100,9 +113,9 @@ class ViewCountSettingsTab extends PluginSettingTab {
 			.setDesc(viewCountDesc)
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.viewCountPropertyName)
+					.setValue(this.plugin.settings.propertyName)
 					.onChange(async (value) => {
-						this.plugin.settings.viewCountPropertyName = value;
+						this.plugin.settings.propertyName = value;
 						await this.plugin.saveSettings();
 					})
 			);
@@ -111,7 +124,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Templater delay")
 			.setDesc(
-				"Time to wait before adding a view count property to a new markdown note. Increase this value if you're using the Templater plugin and template applied during new note creation is being overwritten."
+				"Time to wait before adding a view count property to a new note. Increase this value if you're using the Templater plugin and the template applied during new note creation is being overwritten."
 			)
 			.addDropdown((cb) => {
 				cb.addOptions({

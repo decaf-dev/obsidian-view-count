@@ -1,8 +1,7 @@
-export interface ViewCountPluginSettings {
-	countMethod: CountMethod;
-	syncToFrontmatter: boolean;
-	skipNewNotes: boolean;
-	propertyName: string;
+export interface ViewCountPluginSettings_2_4_1 {
+	viewCountType: TViewCount;
+	saveViewCountToFrontmatter: boolean;
+	viewCountPropertyName: string;
 	pluginVersion: string;
 	logLevel: string;
 	excludedPaths: string[];
@@ -12,16 +11,16 @@ export interface ViewCountPluginSettings {
 	itemCount: ItemCount;
 }
 
-export enum TView {
+enum TView {
 	VIEWS = "views",
 	TRENDS = "trends",
 }
 
-export type CountMethod = "unique-days-opened" | "total-times-opened";
+type TViewCount = "unique-days-opened" | "total-times-opened";
 
-export type ItemCount = 10 | 15 | 20 | 25 | 50 | 100;
+type ItemCount = 10 | 15 | 20 | 25 | 50 | 100;
 
-export enum TimePeriod {
+enum TimePeriod {
 	MONTH = "month",
 	WEEK_ISO = "week-iso",
 	WEEK = "week",

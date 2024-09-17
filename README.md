@@ -73,7 +73,7 @@ You may dynamically query view count data using the [Dataview plugin](https://ob
 
 ### Example 1 - Query view count using Dataview
 
-If you have **Sync view count to frontmatter** enabled you may query the view count property from the frontmatter of each markdown note.
+If you have **Sync view count to frontmatter** enabled you may query the view count property from the frontmatter of each note.
 
 ````markdown
 ```dataview
@@ -84,7 +84,7 @@ TABLE view-count AS "View Count" SORT view-count DESC LIMIT 10
 Let's analyze this codeblock:
 
 1. Render a table using the [Dataview Query Language](https://blacksmithgu.github.io/obsidian-dataview/queries/structure/)
-2. Query the `view-count` property in each markdown note
+2. Query the `view-count` property in each note
 3. Display that property in a column called "View Count"
 4. Sort the results in descending order (highest to lowest)
 5. Limit the results to 10 notes
@@ -185,9 +185,13 @@ The folder paths that should be excluded from view count tracking. Please separa
 
 ### Sync view count
 
-The view count for all files is stored in a JSON file located in the Obsidian configuration folder e.g. `.obsidian/view-count.json`. When `Sync view count` is enabled, the plugin will add a view count property to all markdown notes and continuously update them to match the values stored in the JSON file.
+The view count for all files is stored in a JSON file located in the Obsidian configuration folder e.g. `.obsidian/view-count.json`. When `Sync view count` is enabled, the plugin will add a view count property to all notes and continuously update them to match the values stored in the JSON file.
 
 Enabling this setting makes view count visible on mobile devices.
+
+### Skip new notes
+
+When enabled, new notes will not have a view count property added upon creation. However, if `Sync View Count` is enabled, a property will be added when the note is opened.
 
 ### Property name
 
@@ -198,7 +202,7 @@ The name of the property that the view count will be stored in.
 
 ### Templater delay
 
-The time to wait in milliseconds before adding a view count property to a new markdown note. You should increase this value if you're using the [Templater plugin](https://github.com/SilentVoid13/Templater) and the template applied during new note creation is being overwritten.
+The time to wait in milliseconds before adding a view count property to a new note. You should increase this value if you're using the [Templater plugin](https://github.com/SilentVoid13/Templater) and the template applied during new note creation is being overwritten.
 
 ## License
 

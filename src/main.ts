@@ -1,19 +1,24 @@
-import { Plugin, TFile } from 'obsidian';
-import ViewCountSettingsTab from './obsidian/view-count-settings-tab';
-import { TView, TimePeriod, ViewCountPluginSettings } from './types';
-import ViewCountItemView from './obsidian/view-count-item-view';
-import { DEFAULT_SETTINGS, VIEW_COUNT_ITEM_VIEW } from './constants';
-import Logger from 'js-logger';
-import { formatMessageForLogger, stringToLogLevel } from './logger';
-import _ from 'lodash';
-import { isVersionLessThan } from './utils';
-import ViewCountCache from './storage/view-count-cache';
-import { migrateFileStorage } from './migration/migrate-file-storage';
-import { migratePropertyStorage } from './migration/migrate-property-storage';
-import { ViewCountPluginSettings_1_2_2 } from './types/types-1.2.2';
-import { ViewCountPluginSettings_1_2_1 } from './types/types-1.2.1';
-import { ViewCountPluginSettings_2_3_1 } from './types/types-2.3.1';
-import { DurationFilter_2_4_0, TView_2_4_0, ViewCountPluginSettings_2_4_0 } from './types/types-2.4.0';
+import { Plugin, TFile } from "obsidian";
+import ViewCountSettingsTab from "./obsidian/view-count-settings-tab";
+import { TView, TimePeriod, ViewCountPluginSettings } from "./types";
+import ViewCountItemView from "./obsidian/view-count-item-view";
+import { DEFAULT_SETTINGS, VIEW_COUNT_ITEM_VIEW } from "./constants";
+import Logger from "js-logger";
+import { formatMessageForLogger, stringToLogLevel } from "./logger";
+import _ from "lodash";
+import { isVersionLessThan } from "./utils";
+import ViewCountCache from "./storage/view-count-cache";
+import { migrateFileStorage } from "./migration/migrate-file-storage";
+import { migratePropertyStorage } from "./migration/migrate-property-storage";
+import { ViewCountPluginSettings_1_2_2 } from "./types/types-1.2.2";
+import { ViewCountPluginSettings_1_2_1 } from "./types/types-1.2.1";
+import { ViewCountPluginSettings_2_3_1 } from "./types/types-2.3.1";
+import {
+	DurationFilter_2_4_0,
+	TView_2_4_0,
+	ViewCountPluginSettings_2_4_0,
+} from "./types/types-2.4.0";
+import { ViewCountPluginSettings_2_4_1 } from "./types/types-2.4.1";
 
 export default class ViewCountPlugin extends Plugin {
 	settings: ViewCountPluginSettings = DEFAULT_SETTINGS;
@@ -32,7 +37,7 @@ export default class ViewCountPlugin extends Plugin {
 
 		this.registerView(
 			VIEW_COUNT_ITEM_VIEW,
-			(leaf) => new ViewCountItemView(leaf, this),
+			(leaf) => new ViewCountItemView(leaf, this)
 		);
 
 		this.addSettingTab(new ViewCountSettingsTab(this.app, this));
@@ -48,7 +53,7 @@ export default class ViewCountPlugin extends Plugin {
 			name: "Open view count view",
 			callback: () => {
 				this.openViewCountView(true);
-			}
+			},
 		});
 
 		this.app.workspace.onLayoutReady(async () => {
@@ -73,22 +78,27 @@ export default class ViewCountPlugin extends Plugin {
 			if (settingsVersion !== null) {
 				if (isVersionLessThan(settingsVersion, "1.2.2")) {
 					console.log("Migrating settings from 1.2.1 to 1.2.2");
-					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_1;
+					const typedData =
+						data as unknown as ViewCountPluginSettings_1_2_1;
 					const newData: ViewCountPluginSettings_1_2_2 = {
 						...typedData,
-						templaterDelay: 0
-					}
+						templaterDelay: 0,
+					};
 					data = newData as unknown as Record<string, unknown>;
 				}
 				if (isVersionLessThan(settingsVersion, "2.0.0")) {
 					console.log("Migrating settings from 1.2.2 to 2.0.0");
-					const typedData = (data as unknown) as ViewCountPluginSettings_1_2_2;
+					const typedData =
+						data as unknown as ViewCountPluginSettings_1_2_2;
 
 					const newData: ViewCountPluginSettings_2_3_1 = {
 						...typedData,
-						saveViewCountToFrontmatter: typedData.storageType === "property" ? true : false,
-						viewCountType: typedData.incrementOnceADay ? "unique-days-opened" : "total-times-opened",
-					}
+						saveViewCountToFrontmatter:
+							typedData.storageType === "property" ? true : false,
+						viewCountType: typedData.incrementOnceADay
+							? "unique-days-opened"
+							: "total-times-opened",
+					};
 					data = newData as unknown as Record<string, unknown>;
 
 					this.settings_1_2_2 = structuredClone(typedData);
@@ -97,27 +107,46 @@ export default class ViewCountPlugin extends Plugin {
 
 				if (isVersionLessThan(settingsVersion, "2.4.0")) {
 					console.log("Migrating settings from 2.3.1 to 2.4.0");
-					const typedData = (data as unknown) as ViewCountPluginSettings_2_3_1;
+					const typedData =
+						data as unknown as ViewCountPluginSettings_2_3_1;
 					const newData: ViewCountPluginSettings_2_4_0 = {
 						...typedData,
 						durationFilter: DurationFilter_2_4_0.DAYS_3,
 						currentView: TView_2_4_0.MOST_VIEWED,
-						listSize: 20
-					}
+						listSize: 20,
+					};
 					data = newData as unknown as Record<string, unknown>;
 				}
 
 				if (isVersionLessThan(settingsVersion, "2.4.1")) {
 					console.log("Migrating settings from 2.4.0 to 2.4.1");
-					const typedData = (data as unknown) as ViewCountPluginSettings_2_4_0;
-					const newData: ViewCountPluginSettings = {
+					const typedData =
+						data as unknown as ViewCountPluginSettings_2_4_0;
+					const newData: ViewCountPluginSettings_2_4_1 = {
 						...typedData,
 						timePeriod: TimePeriod.DAYS_3,
 						currentView: TView.VIEWS,
-						itemCount: 20
-					}
+						itemCount: 20,
+					};
 					delete (newData as any).durationFilter;
 					delete (newData as any).listSize;
+					data = newData as unknown as Record<string, unknown>;
+				}
+
+				if (isVersionLessThan(settingsVersion, "2.5.0")) {
+					console.log("Migrating settings from 2.4.1 to 2.5.0");
+					const typedData =
+						data as unknown as ViewCountPluginSettings_2_4_1;
+					const newData: ViewCountPluginSettings = {
+						...typedData,
+						skipNewNotes: false,
+						countMethod: typedData.viewCountType,
+						propertyName: typedData.viewCountPropertyName,
+						syncToFrontmatter: typedData.saveViewCountToFrontmatter,
+					};
+					delete (newData as any).viewCountType;
+					delete (newData as any).viewCountPropertyName;
+					delete (newData as any).saveViewCountToFrontmatter;
 					data = newData as unknown as Record<string, unknown>;
 				}
 			}
@@ -140,38 +169,60 @@ export default class ViewCountPlugin extends Plugin {
 			throw new Error("View count cache is null");
 		}
 
-		this.registerEvent(this.app.workspace.on("file-open", async (file) => {
-			if (file === null) return;
-			await this.debounceHandleFileOpen(file);
-		}));
+		this.registerEvent(
+			this.app.workspace.on("file-open", async (file) => {
+				if (file === null) return;
+				await this.debounceHandleFileOpen(file);
+			})
+		);
 
-		this.registerEvent(this.app.workspace.on("active-leaf-change", async (leaf) => {
-			if (leaf === null) return;
-			const viewType = leaf.view.getViewType();
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", async (leaf) => {
+				if (leaf === null) return;
+				const viewType = leaf.view.getViewType();
 
-			if (viewType !== "markdown" && viewType !== "image" && viewType !== "pdf" && viewType != "dataloom" && viewType != "audio" && viewType != "video") {
-				Logger.debug({ fileName: "main.ts", functionName: "active-leaf-change", message: "view count not supported for view type" }, { viewType });
-				this.viewCountStatusBarItem?.setText("");
-				return;
-			} else {
-				const file = (leaf.view as any).file as TFile | null;
-				if (file != null) {
-					await this.debounceHandleFileOpen(file);
+				if (
+					viewType !== "markdown" &&
+					viewType !== "image" &&
+					viewType !== "pdf" &&
+					viewType != "dataloom" &&
+					viewType != "audio" &&
+					viewType != "video"
+				) {
+					Logger.debug(
+						{
+							fileName: "main.ts",
+							functionName: "active-leaf-change",
+							message: "view count not supported for view type",
+						},
+						{ viewType }
+					);
+					this.viewCountStatusBarItem?.setText("");
+					return;
+				} else {
+					const file = (leaf.view as any).file as TFile | null;
+					if (file != null) {
+						await this.debounceHandleFileOpen(file);
+					}
 				}
-			}
-		}));
+			})
+		);
 
-		this.registerEvent(this.app.vault.on("rename", async (file, oldPath) => {
-			if (file instanceof TFile) {
-				await cache.renameEntry(file.path, oldPath);
-			}
-		}));
+		this.registerEvent(
+			this.app.vault.on("rename", async (file, oldPath) => {
+				if (file instanceof TFile) {
+					await cache.renameEntry(file.path, oldPath);
+				}
+			})
+		);
 
-		this.registerEvent(this.app.vault.on("delete", async (file) => {
-			if (file instanceof TFile) {
-				await cache.deleteEntry(file);
-			}
-		}));
+		this.registerEvent(
+			this.app.vault.on("delete", async (file) => {
+				if (file instanceof TFile) {
+					await cache.deleteEntry(file);
+				}
+			})
+		);
 	}
 
 	private openViewCountView(active: boolean) {
@@ -184,9 +235,12 @@ export default class ViewCountPlugin extends Plugin {
 		}
 	}
 
-
 	private async handleFileOpen(file: TFile) {
-		Logger.trace({ fileName: "main.ts", functionName: "handleFileOpen", message: "called" });
+		Logger.trace({
+			fileName: "main.ts",
+			functionName: "handleFileOpen",
+			message: "called",
+		});
 		if (this.viewCountCache === null) {
 			throw new Error("View count cache is null");
 		}
