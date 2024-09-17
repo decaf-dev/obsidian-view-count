@@ -72,7 +72,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Sync view count")
 			.setDesc(
-				"View count is automatically saved to a JSON file. Enabling sync will add and continuously update a frontmatter property in markdown notes to reflect the view count stored in the JSON file."
+				"When enabled, a frontmatter property will be added and continuously updated in all relevant markdown notes to reflect the view count values stored in the JSON file."
 			)
 			.addToggle((component) =>
 				component
@@ -111,7 +111,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Templater delay")
 			.setDesc(
-				"Time to wait before adding a view count property to a new markdown note. Increase this value if you're using the Templater plugin and your template is being overwritten."
+				"Time to wait before adding a view count property to a new markdown note. Increase this value if you're using the Templater plugin and template applied during new note creation is being overwritten."
 			)
 			.addDropdown((cb) => {
 				cb.addOptions({
