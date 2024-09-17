@@ -30,6 +30,8 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		new Setting(containerEl).setName("General").setHeading();
+
 		new Setting(containerEl)
 			.setName("Count method")
 			.setDesc("Method used to calculate view counts.")
@@ -54,7 +56,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Excluded paths")
 			.setDesc(
-				"The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. folder1,folder2/inner"
+				"Folder paths to exclude from view count tracking. Please separate individual paths by commas. e.g. folder1,folder2"
 			)
 			.addText((component) =>
 				component
@@ -67,19 +69,11 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl).setName("Frontmatter").setHeading();
 
-		const storageTypeDesc = new DocumentFragment();
-		storageTypeDesc.createDiv({
-			text: "Save the current view count to a frontmatter property in each note. This is useful if you want to query for view count using the DataView plugin.",
-		});
-		storageTypeDesc.createEl("br");
-		storageTypeDesc.createDiv({
-			text: "Warning: once you enable this setting, the view count property in all relevant notes will be updated.",
-			cls: "view-count-text--warning",
-		});
-
 		new Setting(containerEl)
-			.setName("Sync view count to frontmatter")
-			.setDesc(storageTypeDesc)
+			.setName("Sync view count")
+			.setDesc(
+				"View count is automatically saved to a JSON file. Enabling sync will add and continuously update a frontmatter property in markdown notes to reflect the view count stored in the JSON file."
+			)
 			.addToggle((component) =>
 				component
 					.setValue(this.plugin.settings.saveViewCountToFrontmatter)
@@ -93,16 +87,16 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		const viewCountDesc = new DocumentFragment();
 		viewCountDesc.createDiv({
-			text: "The name of the property that the view count will be stored in.",
+			text: "Property name to store the view count in.",
 		});
 		viewCountDesc.createEl("br");
 		viewCountDesc.createDiv({
-			text: "Notice: Please rename the existing property before updating this setting. You can use the rename option in the 'All Properties' view in the sidebar to do this.",
+			text: "Please rename the existing property in all your notes before changing this setting. You can use the rename option from the 'All Properties' view in the sidebar.",
 			cls: "view-count-text--emphasize",
 		});
 
 		new Setting(containerEl)
-			.setName("View count property name")
+			.setName("Property name")
 			.setDesc(viewCountDesc)
 			.addText((text) =>
 				text
@@ -117,7 +111,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Templater delay")
 			.setDesc(
-				"The delay in milliseconds before inserting view count frontmatter. Increase this value if you're using the Templater plugin and your template is being overwritten"
+				"Time to wait before adding a view count property to a new markdown note. Increase this value if you're using the Templater plugin and your template is being overwritten."
 			)
 			.addDropdown((cb) => {
 				cb.addOptions({
@@ -140,7 +134,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Log level")
 			.setDesc(
-				"Sets the log level. Please use trace to see all log messages."
+				"Set the log level. Please use trace to see all log messages."
 			)
 			.addDropdown((cb) => {
 				cb.addOptions({
