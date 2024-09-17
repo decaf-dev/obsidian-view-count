@@ -1,7 +1,14 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import ViewCountPlugin from "src/main";
 
-import { LOG_LEVEL_DEBUG, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_OFF, LOG_LEVEL_TRACE, LOG_LEVEL_WARN } from "../logger/constants";
+import {
+	LOG_LEVEL_DEBUG,
+	LOG_LEVEL_ERROR,
+	LOG_LEVEL_INFO,
+	LOG_LEVEL_OFF,
+	LOG_LEVEL_TRACE,
+	LOG_LEVEL_WARN,
+} from "../logger/constants";
 import Logger from "js-logger";
 import { stringToLogLevel } from "src/logger";
 
@@ -23,41 +30,40 @@ class ViewCountSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		const viewCountTypeDesc = new DocumentFragment();
-		viewCountTypeDesc.createDiv({
-			text: "View count can be defined two ways: the total number of times the file has been opened or the number of unique days the file has been opened.",
-		});
-		viewCountTypeDesc.createEl("br");
-		viewCountTypeDesc.createDiv({
-			text: "Warning: if you change this setting and you have 'Save view count to frontmatter' enabled, the view count property in all relevant notes will be updated.",
-			cls: "view-count-text--warning",
-		});
-
 		new Setting(containerEl)
-			.setName('View count type')
-			.setDesc(viewCountTypeDesc)
-			.addDropdown(component => component
-				.addOption("unique-days-opened", "Unique days opened")
-				.addOption("total-times-opened", "Total times opened")
-				.setValue(this.plugin.settings.viewCountType)
-				.onChange(async (value) => {
-					this.plugin.settings.viewCountType = value as "unique-days-opened" | "total-times-opened";
-					await this.plugin.saveSettings();
+			.setName("Count method")
+			.setDesc("Method used to calculate view counts.")
+			.addDropdown((component) =>
+				component
+					.addOption("unique-days-opened", "Unique days opened")
+					.addOption("total-times-opened", "Total times opened")
+					.setValue(this.plugin.settings.viewCountType)
+					.onChange(async (value) => {
+						this.plugin.settings.viewCountType = value as
+							| "unique-days-opened"
+							| "total-times-opened";
+						await this.plugin.saveSettings();
 
-					if (this.plugin.settings.saveViewCountToFrontmatter) {
-						await viewCountCache.syncViewCountToFrontmatter();
-					}
-					await viewCountCache.debounceRefresh();
-				}));
-
+						if (this.plugin.settings.saveViewCountToFrontmatter) {
+							await viewCountCache.syncViewCountToFrontmatter();
+						}
+						await viewCountCache.debounceRefresh();
+					})
+			);
 
 		new Setting(containerEl)
 			.setName("Excluded paths")
-			.setDesc("The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. folder1,folder2/inner")
-			.addText(component => component.setValue(this.plugin.settings.excludedPaths.join(",")).onChange(async (value) => {
-				this.plugin.settings.excludedPaths = value.split(",");
-				await this.plugin.saveSettings();
-			}));
+			.setDesc(
+				"The folder paths that should be excluded from view count tracking. Please separate individual paths by commas. e.g. folder1,folder2/inner"
+			)
+			.addText((component) =>
+				component
+					.setValue(this.plugin.settings.excludedPaths.join(","))
+					.onChange(async (value) => {
+						this.plugin.settings.excludedPaths = value.split(",");
+						await this.plugin.saveSettings();
+					})
+			);
 
 		new Setting(containerEl).setName("Frontmatter").setHeading();
 
@@ -72,16 +78,18 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		});
 
 		new Setting(containerEl)
-			.setName('Sync view count to frontmatter')
+			.setName("Sync view count to frontmatter")
 			.setDesc(storageTypeDesc)
-			.addToggle(component => component
-				.setValue(this.plugin.settings.saveViewCountToFrontmatter)
-				.onChange(async (value) => {
-					this.plugin.settings.saveViewCountToFrontmatter = value;
+			.addToggle((component) =>
+				component
+					.setValue(this.plugin.settings.saveViewCountToFrontmatter)
+					.onChange(async (value) => {
+						this.plugin.settings.saveViewCountToFrontmatter = value;
 
-					await this.plugin.saveSettings();
-					await viewCountCache.syncViewCountToFrontmatter();
-				}));
+						await this.plugin.saveSettings();
+						await viewCountCache.syncViewCountToFrontmatter();
+					})
+			);
 
 		const viewCountDesc = new DocumentFragment();
 		viewCountDesc.createDiv({
@@ -93,17 +101,17 @@ class ViewCountSettingsTab extends PluginSettingTab {
 			cls: "view-count-text--emphasize",
 		});
 
-
 		new Setting(containerEl)
-			.setName('View count property name')
+			.setName("View count property name")
 			.setDesc(viewCountDesc)
-			.addText(text => text
-				.setValue(this.plugin.settings.viewCountPropertyName)
-				.onChange(async (value) => {
-					this.plugin.settings.viewCountPropertyName = value;
-					await this.plugin.saveSettings();
-				}));
-
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.viewCountPropertyName)
+					.onChange(async (value) => {
+						this.plugin.settings.viewCountPropertyName = value;
+						await this.plugin.saveSettings();
+					})
+			);
 
 		new Setting(containerEl).setName("Plugin compatibility").setHeading();
 		new Setting(containerEl)
@@ -118,16 +126,15 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					"2000": "2000",
 					"3000": "3000",
 					"4000": "4000",
-					"5000": "5000"
-				})
-				cb.setValue(this.plugin.settings.templaterDelay.toString()).onChange(
-					async (value) => {
-						this.plugin.settings.templaterDelay = parseInt(value);
-						await this.plugin.saveSettings();
-					}
-				)
+					"5000": "5000",
+				});
+				cb.setValue(
+					this.plugin.settings.templaterDelay.toString()
+				).onChange(async (value) => {
+					this.plugin.settings.templaterDelay = parseInt(value);
+					await this.plugin.saveSettings();
+				});
 			});
-
 
 		new Setting(containerEl).setName("Debugging").setHeading();
 		new Setting(containerEl)
@@ -142,8 +149,8 @@ class ViewCountSettingsTab extends PluginSettingTab {
 					[LOG_LEVEL_WARN]: "Warn",
 					[LOG_LEVEL_INFO]: "Info",
 					[LOG_LEVEL_DEBUG]: "Debug",
-					[LOG_LEVEL_TRACE]: "Trace"
-				})
+					[LOG_LEVEL_TRACE]: "Trace",
+				});
 				cb.setValue(this.plugin.settings.logLevel).onChange(
 					async (value) => {
 						this.plugin.settings.logLevel = value;
