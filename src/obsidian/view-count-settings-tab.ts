@@ -72,7 +72,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Sync view count")
 			.setDesc(
-				"Add and continuously update a frontmatter property in notes to match view count values stored in the JSON file."
+				"Add a view count property to notes and continuously update it to match the view count values stored in the JSON file."
 			)
 			.addToggle((component) =>
 				component
@@ -124,7 +124,7 @@ class ViewCountSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Templater delay")
 			.setDesc(
-				"Time to wait before adding a view count property to a new note. Increase this value if you're using the Templater plugin and the template applied during new note creation is being overwritten."
+				"Time to wait before adding a view count property to a new note."
 			)
 			.addDropdown((cb) => {
 				cb.addOptions({
